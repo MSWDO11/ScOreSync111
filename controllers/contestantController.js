@@ -27,14 +27,19 @@ export const addContestantPage = async (req, res) => {
 
 // ─── Store contestant ─────────────────────────────────────────────────────────
 export const storeContestant = async (req, res) => {
-  const { name, number, barangay, age, gender, description } = req.body;
+  const { name, number, barangay, age, gender, description, photo, platform } = req.body;
   const { eventId } = req.params;
   try {
     await addDoc(collection(db, "events", eventId, "contestants"), {
-      name, number: number || "", barangay: barangay || "",
-      age: age || "", gender: gender || "",
+      name,
+      number:      number      || "",
+      barangay:    barangay    || "",
+      age:         age         || "",
+      gender:      gender      || "",
       description: description || "",
-      createdAt: serverTimestamp(),
+      platform:    platform    || "",
+      photo:       photo       || "",
+      createdAt:   serverTimestamp(),
     });
     req.flash("success_msg", `Contestant "${name}" added.`);
     res.redirect(`/events/${eventId}`);
@@ -72,10 +77,17 @@ export const editContestantPage = async (req, res) => {
 // ─── Update contestant ────────────────────────────────────────────────────────
 export const updateContestant = async (req, res) => {
   const { eventId, id } = req.params;
-  const { name, number, barangay, age, gender, description } = req.body;
+  const { name, number, barangay, age, gender, description, photo, platform } = req.body;
   try {
     await updateDoc(doc(db, "events", eventId, "contestants", id), {
-      name, number, barangay, age, gender, description,
+      name,
+      number:      number      || "",
+      barangay:    barangay    || "",
+      age:         age         || "",
+      gender:      gender      || "",
+      description: description || "",
+      platform:    platform    || "",
+      photo:       photo       || "",
     });
     req.flash("success_msg", "Contestant updated.");
     res.redirect(`/events/${eventId}`);

@@ -5,39 +5,191 @@
 {{> sidebar }}
 <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
   {{#if error_msg}}<div class="alert-error mb-6 animate-fadeup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{error_msg}}</div>{{/if}}
+
   <div class="page-header animate-fadeup">
     <div class="breadcrumb"><a href="/events/{{event.id}}">Back to {{event.name}}</a></div>
     <h1>Add Contestant</h1>
     <p>Register a new contestant for <span class="font-semibold text-blue-600">{{event.name}}</span>.</p>
   </div>
-  <div class="card-flat max-w-xl animate-fadeup-1">
-    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-      <div class="w-9 h-9 grad-brand rounded-xl flex items-center justify-center shadow-sm">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+
+  <div class="grid lg:grid-cols-3 gap-5 animate-fadeup-1">
+
+    <!-- LEFT: Photo Upload -->
+    <div class="lg:col-span-1">
+      <div class="card-flat overflow-hidden sticky top-6">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div class="w-8 h-8 grad-rose rounded-lg flex items-center justify-center shadow-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <h2 class="font-bold text-slate-800">Contestant Photo</h2>
+        </div>
+        <div class="px-5 py-5 space-y-4">
+
+          <!-- Photo Preview -->
+          <div class="relative mx-auto" style="width:200px">
+            <!-- Portrait frame like a pageant photo -->
+            <div id="photo-frame" class="relative rounded-2xl overflow-hidden border-4 border-white shadow-xl" style="width:200px;height:260px;background:linear-gradient(160deg,#e0e7ff,#ede9fe)">
+              <img id="photo-preview" src="" alt="Contestant photo"
+                class="w-full h-full object-cover hidden"
+                style="object-position:center top"/>
+              <!-- Placeholder -->
+              <div id="photo-placeholder" class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center shadow-inner" style="background:rgba(99,102,241,0.12)">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <span class="text-xs text-indigo-300 font-semibold">No photo yet</span>
+              </div>
+              <!-- Number overlay -->
+              <div id="number-overlay" class="absolute bottom-0 left-0 right-0 px-3 py-2 hidden" style="background:linear-gradient(0deg,rgba(0,0,0,0.6),transparent)">
+                <div class="text-white text-xs font-extrabold tracking-widest uppercase text-center" id="overlay-name"></div>
+                <div class="text-white/70 text-[10px] text-center" id="overlay-number"></div>
+              </div>
+            </div>
+            <!-- Upload button overlay -->
+            <button type="button" onclick="document.getElementById('photo-file').click()"
+              class="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg border-2 border-white transition hover:scale-105"
+              style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Photo
+            </button>
+          </div>
+
+          <input type="file" id="photo-file" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden" onchange="handlePhotoUpload(this)"/>
+          <input type="hidden" name="photo" id="photo-b64"/>
+
+          <div class="text-center mt-6 pt-2">
+            <p class="text-[11px] text-slate-400 leading-relaxed">Portrait orientation recommended.<br/>PNG or JPG, max 3MB.</p>
+          </div>
+
+          <!-- Remove photo -->
+          <div id="remove-photo-wrap" class="hidden text-center">
+            <button type="button" onclick="clearPhoto()" class="btn-sm btn-sm-red text-xs w-full justify-center">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Remove Photo
+            </button>
+          </div>
+        </div>
       </div>
-      <div><h2 class="font-bold text-slate-800">Contestant Information</h2><p class="text-slate-400 text-xs">Fields marked * are required</p></div>
     </div>
-    <form method="POST" action="/events/{{event.id}}/contestants" class="px-6 py-5 space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Full Name <span class="text-red-500">*</span></label><input type="text" name="name" placeholder="Contestant name" required class="form-input-bare"/></div>
-        <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">No.</label><input type="text" name="number" placeholder="e.g. 01" class="form-input-bare"/></div>
+
+    <!-- RIGHT: Form Fields -->
+    <div class="lg:col-span-2">
+      <div class="card-flat">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div class="w-9 h-9 grad-brand rounded-xl flex items-center justify-center shadow-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </div>
+          <div>
+            <h2 class="font-bold text-slate-800">Contestant Information</h2>
+            <p class="text-slate-400 text-xs">Fields marked * are required</p>
+          </div>
+        </div>
+        <form method="POST" action="/events/{{event.id}}/contestants" id="contestantForm" class="px-6 py-5 space-y-4">
+          <!-- Hidden photo field is outside this form but submitted via JS before submit -->
+          <input type="hidden" name="photo" id="photo-b64-form"/>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Full Name <span class="text-red-500">*</span></label>
+              <input type="text" name="name" id="field-name" placeholder="e.g. Maria Santos" required class="form-input-bare" oninput="updateOverlay()"/>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Contestant No.</label>
+              <input type="text" name="number" id="field-number" placeholder="e.g. 01" class="form-input-bare" oninput="updateOverlay()"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Barangay</label>
+              <input type="text" name="barangay" placeholder="e.g. Poblacion" class="form-input-bare"/>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Age</label>
+              <input type="number" name="age" placeholder="22" min="1" max="100" class="form-input-bare"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Gender</label>
+              <select name="gender" class="form-input-bare bg-white">
+                <option value="">Select...</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Platform / Advocay</label>
+              <input type="text" name="platform" placeholder="e.g. Environmental Awareness" class="form-input-bare"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Bio / Notes</label>
+            <textarea name="description" rows="3" placeholder="Short bio, background, or notes about this contestant..." class="form-input-bare resize-none"></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button type="submit" class="btn-primary text-sm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Add Contestant
+            </button>
+            <a href="/events/{{event.id}}" class="btn-secondary text-sm">Cancel</a>
+          </div>
+        </form>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Barangay</label><input type="text" name="barangay" placeholder="e.g. Poblacion" class="form-input-bare"/></div>
-        <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Age</label><input type="number" name="age" placeholder="22" min="1" max="100" class="form-input-bare"/></div>
-      </div>
-      <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Gender</label>
-        <select name="gender" class="form-input-bare bg-white"><option value="">Select...</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select>
-      </div>
-      <div><label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Notes</label><textarea name="description" rows="2" placeholder="Optional notes..." class="form-input-bare resize-none"></textarea></div>
-      <div class="flex gap-3 pt-2">
-        <button type="submit" class="btn-primary text-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Add Contestant</button>
-        <a href="/events/{{event.id}}" class="btn-secondary text-sm">Cancel</a>
-      </div>
-    </form>
+    </div>
+
   </div>
 </main>
 </div>
+
+<script>
+function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { alert('Image too large. Max 3MB.'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const b64 = e.target.result;
+    document.getElementById('photo-b64').value      = b64;
+    document.getElementById('photo-b64-form').value = b64;
+    const img = document.getElementById('photo-preview');
+    img.src = b64;
+    img.classList.remove('hidden');
+    document.getElementById('photo-placeholder').style.display = 'none';
+    document.getElementById('remove-photo-wrap').classList.remove('hidden');
+    updateOverlay();
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto() {
+  document.getElementById('photo-b64').value = '';
+  document.getElementById('photo-b64-form').value = '';
+  const img = document.getElementById('photo-preview');
+  img.src = ''; img.classList.add('hidden');
+  document.getElementById('photo-placeholder').style.display = '';
+  document.getElementById('remove-photo-wrap').classList.add('hidden');
+  document.getElementById('number-overlay').classList.add('hidden');
+  document.getElementById('photo-file').value = '';
+}
+function updateOverlay() {
+  const name   = document.getElementById('field-name')?.value || '';
+  const number = document.getElementById('field-number')?.value || '';
+  const overlay = document.getElementById('number-overlay');
+  const hasPhoto = document.getElementById('photo-preview').src && !document.getElementById('photo-preview').classList.contains('hidden');
+  if (hasPhoto && (name || number)) {
+    document.getElementById('overlay-name').textContent   = name;
+    document.getElementById('overlay-number').textContent = number ? 'No. ' + number : '';
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+  }
+}
+</script>
+
 {{> footer }}
 </body>
 </html>
