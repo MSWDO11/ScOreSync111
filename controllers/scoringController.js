@@ -1,15 +1,19 @@
 import { db } from "../models/firebaseConfig.js";
 import {
-  collection, addDoc, getDocs, getDoc, doc,
-  setDoc, query, where, serverTimestamp,
+  collection, getDocs, getDoc, doc,
+  setDoc, serverTimestamp,
 } from "firebase/firestore";
 
-// Scores stored at: events/{eventId}/scores/{judgeId_contestantId_criteriaId}
+// ─── Colour palette (matches judge.xian JS array) ────────────────────────────
+const CRITERIA_COLORS = [
+  "#2563eb","#7c3aed","#059669","#dc2626",
+  "#d97706","#0891b2","#be185d","#65a30d",
+];
 
 // ─── Judge scoring panel ──────────────────────────────────────────────────────
 export const scoringPage = async (req, res) => {
   const { eventId } = req.params;
-  const judgeId = req.session.userId;
+  const judgeId     = req.session.userId;
   try {
     const [eSnap, cSnap, crSnap, sSnap] = await Promise.all([
       getDoc(doc(db, "events", eventId)),
@@ -22,9 +26,13 @@ export const scoringPage = async (req, res) => {
 
     const event       = { id: eSnap.id, ...eSnap.data() };
     const contestants = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const criteria    = crSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const criteria    = crSnap.docs.map((d, i) => ({
+      id: d.id,
+      ...d.data(),
+      color: CRITERIA_COLORS[i % CRITERIA_COLORS.length],
+    }));
 
-    // Build a lookup: judgeId|contestantId|criteriaId -> score
+    // Build score lookup: contestantId|criteriaId -> score
     const scoreMap = {};
     sSnap.docs.forEach(d => {
       const s = d.data();
@@ -33,7 +41,7 @@ export const scoringPage = async (req, res) => {
       }
     });
 
-    // Attach existing scores to criteria per contestant
+    // Build scoring matrix
     const matrix = contestants.map(c => ({
       ...c,
       scores: criteria.map(cr => ({
@@ -41,20 +49,22 @@ export const scoringPage = async (req, res) => {
         criteriaName: cr.name,
         weight:       cr.weight,
         maxScore:     cr.maxScore,
+        color:        cr.color,
         value:        scoreMap[`${c.id}|${cr.id}`] ?? "",
       })),
     }));
 
     res.render("scoring/judge", {
-      title: `Score Entry — ${event.name}`,
+      title:       `Score Entry — ${event.name}`,
       event,
       contestants: matrix,
       criteria,
-      userName: req.session.userName,
-      userRole: req.session.userRole,
+      userName:    req.session.userName,
+      userRole:    req.session.userRole,
       userInitial: (req.session.userName || "U")[0].toUpperCase(),
-      isAdmin: req.session.userRole === "admin",
-      isJudge: req.session.userRole === "judge",
+      isAdmin:     req.session.userRole === "admin",
+      isJudge:     req.session.userRole === "judge",
+      isEncoder:   req.session.userRole === "encoder",
     });
   } catch (err) {
     console.error(err);
@@ -66,9 +76,8 @@ export const scoringPage = async (req, res) => {
 // ─── Submit scores ────────────────────────────────────────────────────────────
 export const submitScores = async (req, res) => {
   const { eventId } = req.params;
-  const judgeId = req.session.userId;
-  // scores[contestantId][criteriaId] = value
-  const { scores } = req.body;
+  const judgeId     = req.session.userId;
+  const { scores }  = req.body;
 
   try {
     const writes = [];
@@ -80,6 +89,7 @@ export const submitScores = async (req, res) => {
         writes.push(
           setDoc(doc(db, "events", eventId, "scores", docId), {
             judgeId,
+            judgeName:   req.session.userName || "Unknown",
             contestantId,
             criteriaId,
             score,
@@ -113,50 +123,108 @@ export const resultsPage = async (req, res) => {
 
     const event       = { id: eSnap.id, ...eSnap.data() };
     const contestants = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const criteria    = crSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const criteria    = crSnap.docs.map((d, i) => ({
+      id: d.id,
+      ...d.data(),
+      color: CRITERIA_COLORS[i % CRITERIA_COLORS.length],
+    }));
     const allScores   = sSnap.docs.map(d => d.data());
 
-    // Count unique judges who submitted
-    const judgeSet = new Set(allScores.map(s => s.judgeId));
-    const judgeCount = judgeSet.size || 1;
+    // ── Unique judges ──
+    const judgeMap = {};  // judgeId -> judgeName
+    allScores.forEach(s => {
+      if (s.judgeId && !judgeMap[s.judgeId]) {
+        judgeMap[s.judgeId] = s.judgeName || "Judge";
+      }
+    });
+    const judgeCount = Object.keys(judgeMap).length || 1;
 
-    // For each contestant: weighted average across all judges
+    // ── Ranked contestants ──
     const ranked = contestants.map(c => {
       let totalWeighted = 0;
-      const breakdown = criteria.map(cr => {
+
+      const breakdown = criteria.map((cr, i) => {
         const judgeScores = allScores.filter(
           s => s.contestantId === c.id && s.criteriaId === cr.id
         );
         const avg = judgeScores.length
           ? judgeScores.reduce((sum, s) => sum + s.score, 0) / judgeScores.length
           : 0;
-        const weighted = (avg / (cr.maxScore || 100)) * (cr.weight || 0);
-        totalWeighted += weighted;
-        return { name: cr.name, weight: cr.weight, avg: avg.toFixed(2), weighted: weighted.toFixed(2) };
+        const weighted    = (avg / (Number(cr.maxScore) || 100)) * (Number(cr.weight) || 0);
+        const barPct      = Math.min((avg / (Number(cr.maxScore) || 100)) * 100, 100).toFixed(1);
+        totalWeighted    += weighted;
+        return {
+          name:     cr.name,
+          weight:   cr.weight,
+          color:    CRITERIA_COLORS[i % CRITERIA_COLORS.length],
+          avg:      avg.toFixed(2),
+          weighted: weighted.toFixed(2),
+          barPct,
+        };
       });
+
       return {
         ...c,
         breakdown,
-        finalScore: totalWeighted.toFixed(4),
+        finalScore:        totalWeighted.toFixed(4),
         finalScoreDisplay: totalWeighted.toFixed(2),
       };
     });
 
-    // Sort by finalScore descending, assign rank
+    // Sort descending, assign rank + gap-to-first
     ranked.sort((a, b) => b.finalScore - a.finalScore);
-    ranked.forEach((c, i) => { c.rank = i + 1; });
+    const topScore = ranked.length ? parseFloat(ranked[0].finalScore) : 0;
+    ranked.forEach((c, i) => {
+      c.rank        = i + 1;
+      c.gapToFirst  = (topScore - parseFloat(c.finalScore)).toFixed(2);
+    });
+
+    // ── Per-judge breakdown ──
+    const judgeBreakdown = Object.entries(judgeMap).map(([jId, jName]) => {
+      // Contestants this judge has scored (at least one criteria)
+      const scoredContestantIds = new Set(
+        allScores.filter(s => s.judgeId === jId).map(s => s.contestantId)
+      );
+      const scoredCount   = scoredContestantIds.size;
+      const completionPct = contestants.length
+        ? Math.round((scoredCount / contestants.length) * 100)
+        : 0;
+
+      // Top 3 contestants by this judge's weighted score
+      const judgeWeighted = contestants.map(c => {
+        let w = 0;
+        criteria.forEach(cr => {
+          const s = allScores.find(s => s.judgeId === jId && s.contestantId === c.id && s.criteriaId === cr.id);
+          if (s) w += (s.score / (Number(cr.maxScore) || 100)) * (Number(cr.weight) || 0);
+        });
+        return { contestantName: c.name, score: w.toFixed(2) };
+      });
+      judgeWeighted.sort((a, b) => b.score - a.score);
+
+      return {
+        judgeId:          jId,
+        judgeName:        jName,
+        initial:          (jName || "J")[0].toUpperCase(),
+        scoredCount,
+        totalContestants: contestants.length,
+        completionPct,
+        topScores:        judgeWeighted.slice(0, 3),
+      };
+    });
 
     res.render("scoring/results", {
-      title: `Results — ${event.name}`,
+      title:          `Results — ${event.name}`,
       event,
       ranked,
       criteria,
       judgeCount,
-      userName: req.session.userName,
-      userRole: req.session.userRole,
-      userInitial: (req.session.userName || "U")[0].toUpperCase(),
-      isAdmin: req.session.userRole === "admin",
-      isJudge: req.session.userRole === "judge",
+      judgeBreakdown,
+      userName:       req.session.userName,
+      userRole:       req.session.userRole,
+      userInitial:    (req.session.userName || "U")[0].toUpperCase(),
+      isAdmin:        req.session.userRole === "admin",
+      isJudge:        req.session.userRole === "judge",
+      isEncoder:      req.session.userRole === "encoder",
     });
   } catch (err) {
     console.error(err);

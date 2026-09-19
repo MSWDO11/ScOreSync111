@@ -5,154 +5,378 @@
 {{> sidebar }}
 <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
 
-  <div class="flex items-start justify-between animate-fadeup no-print">
-    <div class="page-header mb-0">
-      <div class="breadcrumb"><a href="/events/{{event.id}}">Back to {{event.name}}</a></div>
-      <h1>Official Results</h1>
-      <p>Tabulated from <span class="font-semibold text-blue-600">{{judgeCount}}</span> judge(s)</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <div class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-        <span>Auto-refresh:</span>
-        <select id="autoRefreshInterval" class="bg-transparent font-bold text-blue-600 outline-none cursor-pointer">
-          <option value="0">Off</option>
-          <option value="5" selected>Every 5s</option>
-          <option value="10">Every 10s</option>
-          <option value="30">Every 30s</option>
-        </select>
-        <span id="refreshCountdown" class="text-[11px] font-mono text-slate-400 min-w-[20px] text-right">5s</span>
+  <!-- ── Sticky Top Bar ── -->
+  <div class="sticky top-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-white/95 border-b border-slate-100 shadow-sm no-print" style="backdrop-filter:blur(12px)">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="font-extrabold text-slate-900 text-sm truncate">Official Results — {{event.name}}</div>
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-blue-600">{{judgeCount}}</span> judge(s) &bull;
+            <span class="font-semibold text-purple-600">{{ranked.length}}</span> contestant(s) &bull;
+            <span class="font-semibold text-emerald-600">{{criteria.length}}</span> criteria
+          </div>
+        </div>
       </div>
-      <button onclick="window.print()" class="btn-sm btn-sm-gray flex-shrink-0 no-print">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print
-      </button>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- Auto-refresh -->
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <select id="autoRefreshInterval" class="bg-transparent font-bold text-blue-600 outline-none cursor-pointer text-xs">
+            <option value="0">No refresh</option>
+            <option value="5" selected>5s</option>
+            <option value="10">10s</option>
+            <option value="30">30s</option>
+          </select>
+          <span id="refreshCountdown" class="font-mono text-slate-400 min-w-[22px] text-right">5s</span>
+        </div>
+        {{#if isAdmin}}
+        <a href="/events/{{event.id}}/scoring" class="btn-sm btn-sm-purple text-xs">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Score Entry
+        </a>
+        {{/if}}
+        <button onclick="window.print()" class="btn-sm btn-sm-gray text-xs no-print">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+      </div>
     </div>
   </div>
 
+  <!-- Auto-refresh script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const select = document.getElementById("autoRefreshInterval");
-      const countdown = document.getElementById("refreshCountdown");
-      if (!select || !countdown) return;
-
-      let timer = null;
-      let secondsLeft = parseInt(select.value, 10);
-
-      function startTimer() {
+      const sel = document.getElementById("autoRefreshInterval");
+      const cd  = document.getElementById("refreshCountdown");
+      if (!sel || !cd) return;
+      let timer, secs;
+      function start() {
         clearInterval(timer);
-        const intervalSec = parseInt(select.value, 10);
-        if (intervalSec <= 0) {
-          countdown.textContent = "Paused";
-          return;
-        }
-        secondsLeft = intervalSec;
-        countdown.textContent = secondsLeft + "s";
-
+        secs = parseInt(sel.value);
+        if (!secs) { cd.textContent = "—"; return; }
+        cd.textContent = secs + "s";
         timer = setInterval(() => {
-          secondsLeft--;
-          if (secondsLeft <= 0) {
-            clearInterval(timer);
-            window.location.reload();
-          } else {
-            countdown.textContent = secondsLeft + "s";
-          }
+          if (--secs <= 0) { clearInterval(timer); window.location.reload(); }
+          else cd.textContent = secs + "s";
         }, 1000);
       }
-
-      select.addEventListener("change", startTimer);
-      startTimer();
+      sel.addEventListener("change", start);
+      start();
     });
   </script>
 
   {{#if ranked.length}}
-  <div class="card-flat p-6 animate-fadeup-1">
-    <h2 class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Top Finishers</h2>
-    <div class="flex items-end justify-center gap-4 max-w-lg mx-auto">
-      {{#each ranked}}{{#if (eq rank 2)}}
-      <div class="flex-1 text-center">
-        <div class="text-4xl mb-2">🥈</div>
-        <div class="rounded-2xl p-4 border-2 border-slate-200 bg-slate-50">
-          <div class="text-xs text-slate-400 uppercase font-bold tracking-wide mb-1">2nd</div>
-          <div class="font-extrabold text-slate-800 text-sm leading-tight">{{name}}</div>
-          {{#if barangay}}<div class="text-slate-400 text-xs mt-1">Brgy. {{barangay}}</div>{{/if}}
-          <div class="text-2xl font-black text-slate-700 mt-2">{{finalScoreDisplay}}<span class="text-sm font-normal">%</span></div>
+
+  <!-- ── Podium ── -->
+  <div class="card-flat overflow-hidden animate-fadeup">
+    <!-- Header -->
+    <div class="px-6 pt-6 pb-3 text-center relative overflow-hidden" style="background:linear-gradient(135deg,#0f2156,#1a56db)">
+      <div class="absolute inset-0" style="background:radial-gradient(ellipse at center,rgba(255,255,255,0.07) 0%,transparent 70%)"></div>
+      <div class="relative">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3" style="background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85)">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
+          Live Leaderboard
         </div>
+        <h2 class="text-white font-extrabold text-xl tracking-tight">{{event.name}}</h2>
+        <p class="text-blue-200 text-xs mt-1 opacity-80">Official Competition Results</p>
       </div>
-      {{/if}}{{/each}}
-      {{#each ranked}}{{#if (eq rank 1)}}
-      <div class="flex-1 text-center -mt-4">
-        <div class="text-5xl mb-2">🥇</div>
-        <div class="rounded-2xl p-5 border-2 border-yellow-300 shadow-lg" style="background:linear-gradient(180deg,#fffbeb,#fef3c7)">
-          <div class="text-xs text-yellow-600 uppercase font-bold tracking-wide mb-1">Champion</div>
-          <div class="font-extrabold text-slate-900 text-base leading-tight">{{name}}</div>
-          {{#if barangay}}<div class="text-slate-500 text-xs mt-1">Brgy. {{barangay}}</div>{{/if}}
-          <div class="text-3xl font-black text-yellow-600 mt-2">{{finalScoreDisplay}}<span class="text-sm font-normal">%</span></div>
+    </div>
+
+    <!-- Podium Blocks -->
+    <div class="px-6 py-8 bg-gradient-to-b from-slate-50 to-white">
+      <div class="flex items-end justify-center gap-3 max-w-2xl mx-auto">
+
+        <!-- 2nd Place -->
+        {{#each ranked}}{{#if (eq rank 2)}}
+        <div class="flex-1 text-center max-w-[180px]">
+          <div class="text-4xl mb-2 animate-fadeup-1">🥈</div>
+          <div class="rounded-2xl p-4 border-2 border-slate-200 bg-white shadow-sm hover:shadow-md transition">
+            <div class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">2nd Place</div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-extrabold mx-auto mb-2 shadow" style="background:linear-gradient(135deg,#64748b,#94a3b8)">{{number}}</div>
+            <div class="font-extrabold text-slate-800 text-sm leading-tight">{{name}}</div>
+            {{#if barangay}}<div class="text-slate-400 text-[11px] mt-0.5">Brgy. {{barangay}}</div>{{/if}}
+            <div class="text-2xl font-black text-slate-700 mt-3 leading-none">{{finalScoreDisplay}}<span class="text-sm font-normal text-slate-400">%</span></div>
+            <div class="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full bg-slate-400 transition-all duration-700" style="width:{{finalScoreDisplay}}%"></div>
+            </div>
+          </div>
+          <div class="mt-2 h-16 rounded-t-lg bg-slate-200 mx-4"></div>
         </div>
-      </div>
-      {{/if}}{{/each}}
-      {{#each ranked}}{{#if (eq rank 3)}}
-      <div class="flex-1 text-center">
-        <div class="text-4xl mb-2">🥉</div>
-        <div class="rounded-2xl p-4 border-2 border-orange-200 bg-orange-50">
-          <div class="text-xs text-orange-500 uppercase font-bold tracking-wide mb-1">3rd</div>
-          <div class="font-extrabold text-slate-800 text-sm leading-tight">{{name}}</div>
-          {{#if barangay}}<div class="text-slate-400 text-xs mt-1">Brgy. {{barangay}}</div>{{/if}}
-          <div class="text-2xl font-black text-orange-600 mt-2">{{finalScoreDisplay}}<span class="text-sm font-normal">%</span></div>
+        {{/if}}{{/each}}
+
+        <!-- 1st Place -->
+        {{#each ranked}}{{#if (eq rank 1)}}
+        <div class="flex-1 text-center max-w-[200px] -mt-6">
+          <div class="text-5xl mb-2 animate-fadeup" style="filter:drop-shadow(0 4px 8px rgba(251,191,36,0.4))">🏆</div>
+          <div class="rounded-2xl p-5 border-2 border-yellow-300 shadow-xl hover:shadow-2xl transition" style="background:linear-gradient(160deg,#fffbeb,#fef3c7)">
+            <div class="text-[10px] text-yellow-600 uppercase font-black tracking-widest mb-1">Champion</div>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-extrabold mx-auto mb-2 shadow-lg" style="background:linear-gradient(135deg,#92400e,#f59e0b)">{{number}}</div>
+            <div class="font-extrabold text-slate-900 text-base leading-tight">{{name}}</div>
+            {{#if barangay}}<div class="text-slate-500 text-xs mt-0.5">Brgy. {{barangay}}</div>{{/if}}
+            <div class="text-3xl font-black text-yellow-600 mt-3 leading-none">{{finalScoreDisplay}}<span class="text-base font-normal text-yellow-400">%</span></div>
+            <div class="mt-2 h-2 rounded-full bg-yellow-100 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-700" style="width:{{finalScoreDisplay}}%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+            </div>
+          </div>
+          <div class="mt-2 h-24 rounded-t-lg mx-4" style="background:linear-gradient(180deg,#fbbf24,#f59e0b)"></div>
         </div>
+        {{/if}}{{/each}}
+
+        <!-- 3rd Place -->
+        {{#each ranked}}{{#if (eq rank 3)}}
+        <div class="flex-1 text-center max-w-[180px]">
+          <div class="text-4xl mb-2 animate-fadeup-1">🥉</div>
+          <div class="rounded-2xl p-4 border-2 border-orange-200 bg-orange-50 shadow-sm hover:shadow-md transition">
+            <div class="text-[10px] text-orange-500 uppercase font-black tracking-widest mb-1">3rd Place</div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-extrabold mx-auto mb-2 shadow" style="background:linear-gradient(135deg,#92400e,#f97316)">{{number}}</div>
+            <div class="font-extrabold text-slate-800 text-sm leading-tight">{{name}}</div>
+            {{#if barangay}}<div class="text-slate-400 text-[11px] mt-0.5">Brgy. {{barangay}}</div>{{/if}}
+            <div class="text-2xl font-black text-orange-600 mt-3 leading-none">{{finalScoreDisplay}}<span class="text-sm font-normal text-orange-300">%</span></div>
+            <div class="mt-2 h-1.5 rounded-full bg-orange-100 overflow-hidden">
+              <div class="h-full rounded-full bg-orange-400 transition-all duration-700" style="width:{{finalScoreDisplay}}%"></div>
+            </div>
+          </div>
+          <div class="mt-2 h-10 rounded-t-lg bg-orange-200 mx-4"></div>
+        </div>
+        {{/if}}{{/each}}
+
       </div>
-      {{/if}}{{/each}}
     </div>
   </div>
 
+  <!-- ── Full Ranked List with Criteria Bars ── -->
+  <div class="space-y-3 animate-fadeup-1">
+    <div class="flex items-center justify-between px-1">
+      <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Full Standings
+      </h3>
+      <span class="badge badge-blue text-xs">{{ranked.length}} contestants</span>
+    </div>
+
+    {{#each ranked}}
+    <div class="card-flat overflow-hidden hover:shadow-md transition-shadow
+      {{#if (eq rank 1)}}ring-2 ring-yellow-300{{/if}}
+      {{#if (eq rank 2)}}ring-1 ring-slate-300{{/if}}
+      {{#if (eq rank 3)}}ring-1 ring-orange-200{{/if}}">
+
+      <!-- Contestant row -->
+      <div class="px-5 py-4 flex items-center gap-4">
+        <!-- Rank badge -->
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shadow-sm
+          {{#if (eq rank 1)}}text-white{{else}}{{#if (eq rank 2)}}text-white{{else}}{{#if (eq rank 3)}}text-white{{else}}bg-slate-100 text-slate-500{{/if}}{{/if}}{{/if}}"
+          style="{{#if (eq rank 1)}}background:linear-gradient(135deg,#b45309,#f59e0b){{else}}{{#if (eq rank 2)}}background:linear-gradient(135deg,#475569,#94a3b8){{else}}{{#if (eq rank 3)}}background:linear-gradient(135deg,#92400e,#f97316){{/if}}{{/if}}{{/if}}">
+          {{rank}}
+        </div>
+
+        <!-- Contestant number -->
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">
+          {{number}}
+        </div>
+
+        <!-- Name + barangay -->
+        <div class="flex-1 min-w-0">
+          <div class="font-extrabold text-slate-900 text-sm leading-tight truncate">{{name}}</div>
+          {{#if barangay}}<div class="text-slate-400 text-xs mt-0.5">Brgy. {{barangay}}{{#if age}} &bull; {{age}} yrs{{/if}}</div>{{/if}}
+          <!-- Mini criteria bars -->
+          <div class="flex gap-1 mt-2 flex-wrap">
+            {{#each breakdown}}
+            <div class="flex items-center gap-1" title="{{name}}: {{avg}} pts ({{weighted}}%)">
+              <div class="h-1.5 rounded-full overflow-hidden" style="width:48px;background:#f1f5f9">
+                <div class="h-full rounded-full transition-all duration-700" style="width:{{barPct}}%;background:{{color}}"></div>
+              </div>
+              <span class="text-[10px] text-slate-400 font-medium">{{weighted}}%</span>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+
+        <!-- Final score -->
+        <div class="flex-shrink-0 text-right">
+          <div class="font-black text-xl
+            {{#if (eq rank 1)}}text-yellow-600{{else}}{{#if (eq rank 2)}}text-slate-600{{else}}{{#if (eq rank 3)}}text-orange-600{{else}}text-blue-700{{/if}}{{/if}}{{/if}}">
+            {{finalScoreDisplay}}<span class="text-sm font-normal opacity-60">%</span>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-0.5">weighted avg</div>
+        </div>
+      </div>
+
+      <!-- Score progress bar (full width) -->
+      <div class="h-1.5 bg-slate-100">
+        <div class="h-full transition-all duration-700
+          {{#if (eq rank 1)}}{{else}}{{/if}}"
+          style="width:{{finalScoreDisplay}}%;background:{{#if (eq rank 1)}}linear-gradient(90deg,#f59e0b,#fbbf24){{else}}{{#if (eq rank 2)}}linear-gradient(90deg,#64748b,#94a3b8){{else}}{{#if (eq rank 3)}}linear-gradient(90deg,#f97316,#fb923c){{else}}linear-gradient(90deg,#2563eb,#60a5fa){{/if}}{{/if}}{{/if}}">
+        </div>
+      </div>
+
+    </div>
+    {{/each}}
+  </div>
+
+  <!-- ── Official Tabulation Sheet ── -->
   <div class="section-card animate-fadeup-2 overflow-x-auto">
-    <div class="section-header">
+    <div class="section-header no-print">
       <h2>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Full Tabulation Sheet
+        Official Tabulation Sheet
       </h2>
-      <span class="badge badge-blue">{{event.name}}</span>
+      <div class="flex items-center gap-2">
+        <span class="badge badge-blue text-xs">{{event.name}}</span>
+        <span class="badge badge-purple text-xs no-print">{{judgeCount}} judge(s)</span>
+      </div>
     </div>
-    <table class="data-table min-w-max">
+
+    <!-- Print title (hidden on screen) -->
+    <div class="hidden print-show px-6 py-4 border-b border-slate-100">
+      <h2 class="font-extrabold text-lg text-slate-900">{{event.name}} — Official Score Sheet</h2>
+      <p class="text-sm text-slate-500">Judges: {{judgeCount}} &bull; Generated: <span id="print-date"></span></p>
+    </div>
+
+    <table class="data-table min-w-max w-full">
       <thead>
         <tr>
-          <th class="w-12 text-center">Rank</th>
-          <th class="w-10">No.</th>
+          <th class="w-10 text-center">Rank</th>
+          <th class="w-9">No.</th>
           <th>Contestant</th>
-          <th>Barangay</th>
-          {{#each criteria}}<th class="text-center">{{name}}<br/><span class="text-[10px] font-normal normal-case text-slate-400">{{weight}}%</span></th>{{/each}}
-          <th class="text-center text-blue-700">Final Score</th>
+          <th class="hidden sm:table-cell">Barangay</th>
+          {{#each criteria}}
+          <th class="text-center text-xs px-3">
+            <div class="font-bold">{{name}}</div>
+            <div class="font-normal text-slate-400 text-[10px]">{{weight}}% &bull; max {{maxScore}}</div>
+          </th>
+          {{/each}}
+          <th class="text-center text-blue-700 font-extrabold">Final Score</th>
+          <th class="text-center text-slate-500 text-xs no-print">Gap to 1st</th>
         </tr>
       </thead>
       <tbody>
         {{#each ranked}}
-        <tr class="{{#if (eq rank 1)}}bg-yellow-50{{/if}}">
+        <tr class="{{#if (eq rank 1)}}bg-yellow-50/60{{/if}}{{#if (eq rank 2)}}bg-slate-50/60{{/if}}">
           <td class="text-center">
-            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-black
-              {{#if (eq rank 1)}}bg-yellow-400 text-white
-              {{else}}{{#if (eq rank 2)}}bg-slate-300 text-white
-              {{else}}{{#if (eq rank 3)}}bg-orange-400 text-white
-              {{else}}bg-slate-100 text-slate-500{{/if}}{{/if}}{{/if}}">{{rank}}</span>
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-black
+              {{#if (eq rank 1)}}text-white{{else}}{{#if (eq rank 2)}}text-white{{else}}{{#if (eq rank 3)}}text-white{{else}}bg-slate-100 text-slate-500{{/if}}{{/if}}{{/if}}"
+              style="{{#if (eq rank 1)}}background:linear-gradient(135deg,#b45309,#f59e0b){{else}}{{#if (eq rank 2)}}background:linear-gradient(135deg,#475569,#94a3b8){{else}}{{#if (eq rank 3)}}background:linear-gradient(135deg,#92400e,#f97316){{/if}}{{/if}}{{/if}}">
+              {{rank}}
+            </span>
           </td>
-          <td class="text-slate-400 font-mono text-sm">{{number}}</td>
-          <td class="font-semibold text-slate-800">{{name}}</td>
-          <td class="text-slate-500 text-sm">{{barangay}}</td>
-          {{#each breakdown}}<td class="text-center"><div class="font-semibold text-slate-700">{{avg}}</div><div class="text-[11px] text-slate-400">({{weighted}}%)</div></td>{{/each}}
-          <td class="text-center"><span class="font-extrabold text-blue-700 text-base">{{finalScoreDisplay}}%</span></td>
+          <td class="font-mono text-slate-400 text-sm text-center">{{number}}</td>
+          <td>
+            <div class="font-extrabold text-slate-900 text-sm">{{name}}</div>
+            {{#if age}}<div class="text-slate-400 text-xs">{{age}} yrs</div>{{/if}}
+          </td>
+          <td class="text-slate-500 text-sm hidden sm:table-cell">{{barangay}}</td>
+          {{#each breakdown}}
+          <td class="text-center px-3">
+            <div class="font-extrabold text-slate-800 text-sm">{{avg}}</div>
+            <div class="text-[10px] font-bold" style="color:{{color}}">{{weighted}}%</div>
+            <div class="mt-1 h-1 rounded-full bg-slate-100 overflow-hidden w-16 mx-auto">
+              <div class="h-full rounded-full" style="width:{{barPct}}%;background:{{color}}"></div>
+            </div>
+          </td>
+          {{/each}}
+          <td class="text-center">
+            <span class="font-extrabold text-lg
+              {{#if (eq rank 1)}}text-yellow-600{{else}}{{#if (eq rank 2)}}text-slate-600{{else}}{{#if (eq rank 3)}}text-orange-600{{else}}text-blue-700{{/if}}{{/if}}{{/if}}">
+              {{finalScoreDisplay}}%
+            </span>
+          </td>
+          <td class="text-center no-print">
+            {{#if (eq rank 1)}}
+            <span class="badge badge-yellow text-xs">—</span>
+            {{else}}
+            <span class="text-xs font-bold text-rose-500">-{{gapToFirst}}%</span>
+            {{/if}}
+          </td>
         </tr>
         {{/each}}
       </tbody>
     </table>
   </div>
-  {{else}}
-  <div class="card-flat py-20 text-center text-slate-400 animate-fadeup-1">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" class="mx-auto mb-4"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <p class="font-semibold text-base mb-1">No scores submitted yet.</p>
-    <p class="text-sm">Judges need to submit scores before results appear.</p>
+
+  <!-- ── Per-Judge Breakdown ── -->
+  {{#if judgeBreakdown.length}}
+  <div class="section-card animate-fadeup-2 no-print">
+    <div class="section-header">
+      <h2>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Judge Breakdown
+      </h2>
+      <span class="badge badge-purple text-xs">{{judgeCount}} judges</span>
+    </div>
+    {{#each judgeBreakdown}}
+    <div class="px-5 py-4 border-t border-slate-50 first:border-0">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm grad-purple">
+          {{initial}}
+        </div>
+        <div>
+          <div class="font-bold text-slate-800 text-sm">{{judgeName}}</div>
+          <div class="text-[11px] text-slate-400">{{scoredCount}} / {{totalContestants}} contestants scored</div>
+        </div>
+        <div class="ml-auto">
+          <div class="h-1.5 rounded-full bg-slate-100 w-24 overflow-hidden">
+            <div class="h-full rounded-full bg-purple-400 transition-all" style="width:{{completionPct}}%"></div>
+          </div>
+          <div class="text-[10px] text-purple-600 font-bold text-right mt-0.5">{{completionPct}}% done</div>
+        </div>
+      </div>
+      <!-- Top 3 scores by this judge -->
+      <div class="flex flex-wrap gap-2">
+        {{#each topScores}}
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-100 text-xs">
+          <span class="font-bold text-slate-700">{{contestantName}}</span>
+          <span class="text-slate-400">&bull;</span>
+          <span class="font-extrabold text-purple-600">{{score}}%</span>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/each}}
   </div>
   {{/if}}
+
+  {{else}}
+  <!-- ── No Scores Yet ── -->
+  <div class="card-flat animate-fadeup-1 overflow-hidden">
+    <div class="px-6 py-16 text-center" style="background:linear-gradient(135deg,#f8fafc,#eff6ff)">
+      <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm" style="background:linear-gradient(135deg,#e0e7ff,#dbeafe)">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <h3 class="font-extrabold text-slate-800 text-lg mb-2">No scores yet</h3>
+      <p class="text-slate-500 text-sm max-w-xs mx-auto">Judges need to submit scores before results can be displayed here.</p>
+      {{#if isAdmin}}
+      <a href="/events/{{event.id}}/scoring" class="btn-primary mt-6 inline-flex">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Open Score Entry
+      </a>
+      {{/if}}
+    </div>
+  </div>
+  {{/if}}
+
 </main>
 </div>
+
+<style>
+@media print {
+  .no-print { display: none !important; }
+  .print-show { display: block !important; }
+  body { background: white; }
+  .sidebar, nav { display: none !important; }
+  main { padding: 0 !important; }
+  .card-flat, .section-card { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+}
+.print-show { display: none; }
+</style>
+
+<script>
+document.getElementById("print-date") && (document.getElementById("print-date").textContent = new Date().toLocaleDateString());
+</script>
+
 {{> footer }}
 </body>
 </html>
