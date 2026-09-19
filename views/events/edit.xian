@@ -102,6 +102,88 @@
           </div>
         </div>
 
+        <div class="card-flat" style="border-color:#d1fae5">
+          <div class="px-6 py-4 border-b border-emerald-100 flex items-center gap-3">
+            <div class="w-8 h-8 grad-green rounded-lg flex items-center justify-center shadow-sm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <h2 class="font-bold text-slate-800">Payment QR Code</h2>
+          </div>
+          <div class="px-6 py-5 space-y-4">
+            <p class="text-xs text-slate-500 leading-relaxed">Upload a GCash, Maya, bank, or any payment QR so participants can scan and pay directly from the event page.</p>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Payment Method</label>
+              <select name="paymentMethod" class="form-input-bare bg-white">
+                <option value="" {{#unless event.paymentMethod}}selected{{/unless}}>— None / Not Applicable —</option>
+                <option value="GCash"     {{#if (eq event.paymentMethod 'GCash')}}selected{{/if}}>GCash</option>
+                <option value="Maya"      {{#if (eq event.paymentMethod 'Maya')}}selected{{/if}}>Maya (PayMaya)</option>
+                <option value="BDO"       {{#if (eq event.paymentMethod 'BDO')}}selected{{/if}}>BDO</option>
+                <option value="BPI"       {{#if (eq event.paymentMethod 'BPI')}}selected{{/if}}>BPI</option>
+                <option value="UnionBank" {{#if (eq event.paymentMethod 'UnionBank')}}selected{{/if}}>UnionBank</option>
+                <option value="LandBank"  {{#if (eq event.paymentMethod 'LandBank')}}selected{{/if}}>LandBank</option>
+                <option value="Other"     {{#if (eq event.paymentMethod 'Other')}}selected{{/if}}>Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Account Name</label>
+              <input type="text" name="paymentAccountName" value="{{event.paymentAccountName}}" placeholder="e.g. Juan Dela Cruz" class="form-input-bare"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Account Number / GCash No.</label>
+              <input type="text" name="paymentAccountNumber" value="{{event.paymentAccountNumber}}" placeholder="e.g. 09XX-XXX-XXXX" class="form-input-bare"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+                QR Image {{#if event.paymentQR}}<span class="text-emerald-600 font-bold ml-1">✓ Uploaded</span>{{/if}}
+              </label>
+
+              {{#if event.paymentQR}}
+              <!-- Existing QR preview -->
+              <div id="edit-qr-existing" class="text-center space-y-2 mb-3">
+                <img src="{{event.paymentQR}}" alt="Current Payment QR" class="mx-auto rounded-xl border border-slate-200 shadow-sm" style="max-height:180px;max-width:180px;object-fit:contain"/>
+                <p class="text-[11px] text-slate-400">Current QR — upload a new one to replace it</p>
+              </div>
+              {{/if}}
+
+              <div id="edit-qr-dropzone" {{#if event.paymentQR}}style="display:none"{{/if}}
+                onclick="document.getElementById('edit-qr-file').click()"
+                class="flex flex-col items-center justify-center w-full py-6 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50 cursor-pointer hover:bg-emerald-100 transition">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" class="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p class="text-xs text-emerald-700 font-semibold">Click to upload QR image</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">PNG, JPG up to 2MB</p>
+              </div>
+              <input type="file" id="edit-qr-file" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden" onchange="handleEditQRUpload(this)"/>
+              <input type="hidden" name="paymentQR" id="edit-qr-b64" value="{{event.paymentQR}}"/>
+
+              <!-- New upload preview -->
+              <div id="edit-qr-new-preview" class="hidden text-center space-y-2 mt-2">
+                <img id="edit-qr-img" src="" alt="New Payment QR" class="mx-auto rounded-xl border border-slate-200 shadow-sm" style="max-height:180px;max-width:180px;object-fit:contain"/>
+                <button type="button" onclick="clearEditQR()" class="btn-sm btn-sm-red text-xs">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Remove New QR
+                </button>
+              </div>
+
+              {{#if event.paymentQR}}
+              <div class="mt-2 flex gap-2">
+                <button type="button" onclick="replaceEditQR()" class="btn-sm btn-sm-blue text-xs flex-1 justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Replace QR
+                </button>
+                <button type="button" onclick="removeEditQR()" class="btn-sm btn-sm-red text-xs flex-1 justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  Remove QR
+                </button>
+              </div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
         <div class="card-flat" style="border-color:#fecaca">
           <div class="px-6 py-4 border-b border-red-100 flex items-center gap-3">
             <div class="w-8 h-8 grad-rose rounded-lg flex items-center justify-center shadow-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
@@ -128,4 +210,39 @@
 </div>
 {{> footer }}
 </body>
+<script>
+function handleEditQRUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Image too large. Max 2MB.'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('edit-qr-b64').value = e.target.result;
+    document.getElementById('edit-qr-img').src = e.target.result;
+    document.getElementById('edit-qr-new-preview').classList.remove('hidden');
+    document.getElementById('edit-qr-dropzone').style.display = 'none';
+    const ex = document.getElementById('edit-qr-existing');
+    if (ex) ex.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function clearEditQR() {
+  document.getElementById('edit-qr-b64').value = '';
+  document.getElementById('edit-qr-img').src = '';
+  document.getElementById('edit-qr-new-preview').classList.add('hidden');
+  document.getElementById('edit-qr-dropzone').style.display = '';
+  document.getElementById('edit-qr-file').value = '';
+}
+function replaceEditQR() {
+  document.getElementById('edit-qr-file').click();
+}
+function removeEditQR() {
+  if (!confirm('Remove the payment QR from this event?')) return;
+  document.getElementById('edit-qr-b64').value = '';
+  const ex = document.getElementById('edit-qr-existing');
+  if (ex) ex.style.display = 'none';
+  document.getElementById('edit-qr-dropzone').style.display = '';
+  document.getElementById('edit-qr-new-preview').classList.add('hidden');
+}
+</script>
 </html>

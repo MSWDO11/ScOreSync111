@@ -176,7 +176,57 @@
   </div>
   {{/if}}
 
-  <!-- QR Code Card (event-dependent) -->
+  <!-- Payment QR Code Card (shown only if event has payment QR) -->
+  {{#if event.paymentQR}}
+  <div class="section-card animate-fadeup-2" style="border-color:#a7f3d0">
+    <div class="section-header" style="background:#f0fdf4">
+      <h2>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payment QR Code
+        {{#if event.paymentMethod}}<span class="ml-2 badge badge-green text-[10px]">{{event.paymentMethod}}</span>{{/if}}
+      </h2>
+      <a href="/events/{{event.id}}/edit" class="btn-sm btn-sm-gray text-xs">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </a>
+    </div>
+    <div class="px-6 py-6 flex flex-col sm:flex-row items-center gap-6">
+      <!-- QR Image -->
+      <div class="flex-shrink-0 p-3 bg-white rounded-2xl border border-emerald-100 shadow-sm">
+        <img src="{{event.paymentQR}}" alt="Payment QR Code" class="rounded-xl" style="width:160px;height:160px;object-fit:contain"/>
+      </div>
+      <!-- Details -->
+      <div class="flex-1 space-y-3 text-center sm:text-left">
+        <div>
+          <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide">How to Pay</p>
+          <p class="text-sm text-slate-600 mt-1 leading-relaxed">Scan the QR code using your <span class="font-bold text-emerald-700">{{#if event.paymentMethod}}{{event.paymentMethod}}{{else}}payment app{{/if}}</span> to send your payment directly.</p>
+        </div>
+        {{#if event.paymentAccountName}}
+        <div class="flex items-center gap-2 text-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-slate-500">Account Name:</span>
+          <span class="font-bold text-slate-800">{{event.paymentAccountName}}</span>
+        </div>
+        {{/if}}
+        {{#if event.paymentAccountNumber}}
+        <div class="flex items-center gap-2 text-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <span class="text-slate-500">Account No.:</span>
+          <span class="font-bold text-slate-800 font-mono tracking-wide">{{event.paymentAccountNumber}}</span>
+        </div>
+        {{/if}}
+        <div class="flex gap-2 pt-1 justify-center sm:justify-start flex-wrap">
+          <a href="{{event.paymentQR}}" download="payment-qr-{{event.id}}.png" class="btn-sm btn-sm-green text-xs">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download QR
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- Event URL QR Code Card (event-dependent) -->
   <div class="section-card animate-fadeup-2">
     <div class="section-header">
       <h2>

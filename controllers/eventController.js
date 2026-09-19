@@ -45,24 +45,29 @@ export const storeEvent = async (req, res) => {
   const {
     name, description, date, time, venue, type, status,
     organizer, maxContestants, prizes, rules, theme, notes,
+    paymentMethod, paymentAccountName, paymentAccountNumber, paymentQR,
   } = req.body;
   try {
     await addDoc(collection(db, EVENTS), {
-      name:           name || "",
-      description:    description || "",
-      date:           date || "",
-      time:           time || "",
-      venue:          venue || "",
-      type:           type || "pageant",
-      status:         status || "upcoming",
-      organizer:      organizer || "",
-      maxContestants: maxContestants || "",
-      prizes:         prizes || "",
-      rules:          rules || "",
-      theme:          theme || "blue",
-      notes:          notes || "",
-      createdBy:      req.session.userId,
-      createdAt:      serverTimestamp(),
+      name:                 name || "",
+      description:          description || "",
+      date:                 date || "",
+      time:                 time || "",
+      venue:                venue || "",
+      type:                 type || "pageant",
+      status:               status || "upcoming",
+      organizer:            organizer || "",
+      maxContestants:       maxContestants || "",
+      prizes:               prizes || "",
+      rules:                rules || "",
+      theme:                theme || "blue",
+      notes:                notes || "",
+      paymentMethod:        paymentMethod        || "",
+      paymentAccountName:   paymentAccountName   || "",
+      paymentAccountNumber: paymentAccountNumber || "",
+      paymentQR:            paymentQR            || "",
+      createdBy:            req.session.userId,
+      createdAt:            serverTimestamp(),
     });
     req.flash("success_msg", `Event "${name}" created successfully.`);
     res.redirect("/events");
@@ -134,16 +139,21 @@ export const updateEvent = async (req, res) => {
   const {
     name, description, date, time, venue, type, status,
     organizer, maxContestants, prizes, rules, theme, notes,
+    paymentMethod, paymentAccountName, paymentAccountNumber, paymentQR,
   } = req.body;
   try {
     await updateDoc(doc(db, EVENTS, req.params.id), {
       name, description, date, time, venue, type, status,
-      organizer:      organizer      || "",
-      maxContestants: maxContestants || "",
-      prizes:         prizes         || "",
-      rules:          rules          || "",
-      theme:          theme          || "blue",
-      notes:          notes          || "",
+      organizer:            organizer            || "",
+      maxContestants:       maxContestants       || "",
+      prizes:               prizes               || "",
+      rules:                rules                || "",
+      theme:                theme                || "blue",
+      notes:                notes                || "",
+      paymentMethod:        paymentMethod        || "",
+      paymentAccountName:   paymentAccountName   || "",
+      paymentAccountNumber: paymentAccountNumber || "",
+      paymentQR:            paymentQR            || "",
     });
     req.flash("success_msg", `Event "${name}" updated successfully.`);
     res.redirect(`/events/${req.params.id}`);
