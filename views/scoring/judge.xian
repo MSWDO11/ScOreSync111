@@ -53,7 +53,7 @@
       <div class="flex flex-wrap gap-2">
         {{#each criteria}}
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-          <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:{{criteriaColor @index}}"></div>
+          <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:{{color}}"></div>
           <span class="font-semibold text-slate-700">{{name}}</span>
           <span class="text-slate-400">{{weight}}% &bull; max {{maxScore}}</span>
         </div>

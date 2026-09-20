@@ -1,7 +1,7 @@
 import { db } from "../models/firebaseConfig.js";
 import {
   collection, addDoc, getDocs, getDoc, doc,
-  updateDoc, deleteDoc, query, orderBy, where, serverTimestamp,
+  updateDoc, deleteDoc, query, orderBy, serverTimestamp,
 } from "firebase/firestore";
 
 const INVENTORY = "inventory";
@@ -9,8 +9,14 @@ const EVENTS    = "events";
 
 // ─── Helper: fetch all events for the dropdown ────────────────────────────────
 async function getEvents() {
-  const snap = await getDocs(query(collection(db, EVENTS), orderBy("createdAt", "desc")));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  try {
+    const snap = await getDocs(query(collection(db, EVENTS), orderBy("createdAt", "desc")));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    // Fallback without ordering if index not ready
+    const snap = await getDocs(collection(db, EVENTS));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
 }
 
 // ─── List inventory (optionally filter by eventId) ───────────────────────────
@@ -19,20 +25,22 @@ export const listInventory = async (req, res) => {
     const { eventId } = req.query;
     const events = await getEvents();
 
-    let items = [];
+    // Fetch ALL inventory items without compound index requirement
+    // (where + orderBy requires a composite Firestore index; sort in JS instead)
+    const allSnap = await getDocs(collection(db, INVENTORY));
+    let items = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Filter by eventId in JS if provided
     if (eventId) {
-      const q = query(
-        collection(db, INVENTORY),
-        where("eventId", "==", eventId),
-        orderBy("createdAt", "desc")
-      );
-      const snap = await getDocs(q);
-      items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } else {
-      const q = query(collection(db, INVENTORY), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      items = items.filter(item => item.eventId === eventId);
     }
+
+    // Sort by createdAt desc in JS
+    items.sort((a, b) => {
+      const tA = a.createdAt?.seconds ?? 0;
+      const tB = b.createdAt?.seconds ?? 0;
+      return tB - tA;
+    });
 
     // Attach event name to each item
     const eventMap = Object.fromEntries(events.map(e => [e.id, e.name]));
@@ -58,8 +66,8 @@ export const listInventory = async (req, res) => {
       isEncoder:     req.session.userRole === "encoder",
     });
   } catch (err) {
-    console.error(err);
-    req.flash("error_msg", "Could not load inventory.");
+    console.error("Inventory error:", err);
+    req.flash("error_msg", "Could not load inventory. Please try again.");
     res.redirect("/dashboard");
   }
 };
