@@ -1,4 +1,5 @@
 import { db } from "../models/firebaseConfig.js";
+import { getFinanceSummary } from "./financeController.js";
 import {
   collection, addDoc, getDocs, getDoc, doc,
   updateDoc, deleteDoc, query, orderBy, serverTimestamp,
@@ -90,9 +91,10 @@ export const showEvent = async (req, res) => {
     }
     const event = { id: snap.id, ...snap.data() };
 
-    const [cSnap, crSnap] = await Promise.all([
+    const [cSnap, crSnap, finance] = await Promise.all([
       getDocs(collection(db, EVENTS, req.params.id, "contestants")),
       getDocs(collection(db, EVENTS, req.params.id, "criteria")),
+      getFinanceSummary(req.params.id),
     ]);
     const contestants = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     const criteria    = crSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -102,6 +104,7 @@ export const showEvent = async (req, res) => {
       event,
       contestants,
       criteria,
+      finance,
       userName:    req.session.userName,
       userRole:    req.session.userRole,
       userInitial: (req.session.userName || "U")[0].toUpperCase(),

@@ -119,6 +119,12 @@ router.post("/inventory",              requireAuth, requireRole("admin"),       
 router.post("/inventory/:id/update",   requireAuth, requireRole("admin"),           updateInventoryItem);
 router.post("/inventory/:id/delete",   requireAuth, requireRole("admin"),           deleteInventoryItem);
 
+// ─── Event Finance (admin only) ───────────────────────────────────────────────
+import { storeFinanceEntry, deleteFinanceEntry } from "../controllers/financeController.js";
+
+router.post("/events/:eventId/finance",              requireAuth, requireRole("admin"), storeFinanceEntry);
+router.post("/events/:eventId/finance/:entryId/delete", requireAuth, requireRole("admin"), deleteFinanceEntry);
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 import { settingsPage, updateSettings, suggestFeature } from "../controllers/settingsController.js";
 
