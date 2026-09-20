@@ -46,6 +46,7 @@ export const storeEvent = async (req, res) => {
     name, description, date, time, venue, type, status,
     organizer, maxContestants, prizes, rules, theme, notes,
     paymentMethod, paymentAccountName, paymentAccountNumber, paymentQR,
+    otherType,
   } = req.body;
   try {
     await addDoc(collection(db, EVENTS), {
@@ -55,6 +56,7 @@ export const storeEvent = async (req, res) => {
       time:                 time || "",
       venue:                venue || "",
       type:                 type || "pageant",
+      otherType:            otherType || "",
       status:               status || "upcoming",
       organizer:            organizer || "",
       maxContestants:       maxContestants || "",
