@@ -47,12 +47,12 @@ export const listInventory = async (req, res) => {
     items = items.map(item => ({
       ...item,
       eventName:  eventMap[item.eventId] || "—",
-      totalValue: ((Number(item.unitPrice) || 0) * (Number(item.quantity) || 1)).toFixed(2),
+      totalValue: ((Number(item.unitPrice) || 0) * (Number(item.quantity) || 0)).toFixed(2),
     }));
 
-    // Summary totals for the filtered set
-    const totalValue = items.reduce((sum, i) => sum + (Number(i.unitPrice)||0) * (Number(i.quantity)||1), 0);
-    const totalItems = items.reduce((sum, i) => sum + (Number(i.quantity)||1), 0);
+    // Summary totals
+    const totalValue = items.reduce((sum, i) => sum + (Number(i.unitPrice)||0) * (Number(i.quantity)||0), 0);
+    const totalItems = items.reduce((sum, i) => sum + (Number(i.quantity)||0), 0);
 
     // Find selected event
     const selectedEvent = eventId ? events.find(e => e.id === eventId) : null;
@@ -81,53 +81,53 @@ export const listInventory = async (req, res) => {
 
 // ─── Add inventory item ───────────────────────────────────────────────────────
 export const storeInventoryItem = async (req, res) => {
-  const { eventId, name, category, quantity, unit, condition, notes, unitPrice, photo } = req.body;
+  const { eventId, ticketType, quantity, unitPrice, notes, photo } = req.body;
   try {
-    if (!eventId || !name) {
-      req.flash("error_msg", "Event and item name are required.");
+    if (!eventId || !ticketType) {
+      req.flash("error_msg", "Event and ticket type are required.");
       return res.redirect("/inventory");
     }
+    const qty   = Number(quantity)  || 0;
+    const price = Number(unitPrice) || 0;
     await addDoc(collection(db, INVENTORY), {
       eventId,
-      name:      name.trim(),
-      category:  category   || "general",
-      quantity:  Number(quantity)  || 1,
-      unit:      unit       || "pcs",
-      condition: condition  || "good",
-      notes:     notes      || "",
-      unitPrice: Number(unitPrice) || 0,
-      photo:     photo      || "",
-      createdBy: req.session.userId,
-      createdAt: serverTimestamp(),
+      ticketType: ticketType.trim(),
+      quantity:   qty,
+      unitPrice:  price,
+      total:      parseFloat((qty * price).toFixed(2)),
+      notes:      notes || "",
+      photo:      photo || "",
+      createdBy:  req.session.userId,
+      createdAt:  serverTimestamp(),
     });
-    req.flash("success_msg", `Item "${name}" added to inventory.`);
+    req.flash("success_msg", `Ticket record "${ticketType}" added.`);
     res.redirect(`/inventory?eventId=${eventId}`);
   } catch (err) {
     console.error(err);
-    req.flash("error_msg", "Failed to add item. " + err.message);
+    req.flash("error_msg", "Failed to add record. " + err.message);
     res.redirect("/inventory");
   }
 };
 
 // ─── Update inventory item ────────────────────────────────────────────────────
 export const updateInventoryItem = async (req, res) => {
-  const { name, category, quantity, unit, condition, notes, eventId, unitPrice, photo } = req.body;
+  const { ticketType, quantity, unitPrice, notes, eventId, photo } = req.body;
   try {
+    const qty   = Number(quantity)  || 0;
+    const price = Number(unitPrice) || 0;
     await updateDoc(doc(db, INVENTORY, req.params.id), {
-      name:      name.trim(),
-      category:  category  || "general",
-      quantity:  Number(quantity)  || 1,
-      unit:      unit      || "pcs",
-      condition: condition || "good",
-      notes:     notes     || "",
-      unitPrice: Number(unitPrice) || 0,
-      photo:     photo     || "",
+      ticketType: ticketType.trim(),
+      quantity:   qty,
+      unitPrice:  price,
+      total:      parseFloat((qty * price).toFixed(2)),
+      notes:      notes || "",
+      photo:      photo || "",
     });
-    req.flash("success_msg", `Item "${name}" updated.`);
+    req.flash("success_msg", `Record "${ticketType}" updated.`);
     res.redirect(`/inventory?eventId=${eventId}`);
   } catch (err) {
     console.error(err);
-    req.flash("error_msg", "Failed to update item.");
+    req.flash("error_msg", "Failed to update record.");
     res.redirect("/inventory");
   }
 };
@@ -144,11 +144,12 @@ export const exportInventoryCSV = async (req, res) => {
     const eventMap = Object.fromEntries(events.map(e => [e.id, e.name]));
 
     const rows = [
-      ['Item Name','Category','Condition','Quantity','Unit','Unit Price (₱)','Total Value (₱)','Event','Notes'],
+      ['Ticket Type','Qty Sold','Unit Price (₱)','Total Income (₱)','Event','Notes'],
       ...items.map(i => [
-        i.name, i.category, i.condition, i.quantity, i.unit || 'pcs',
+        i.ticketType || i.name || '—',
+        i.quantity,
         i.unitPrice || 0,
-        ((Number(i.unitPrice)||0) * (Number(i.quantity)||1)).toFixed(2),
+        ((Number(i.unitPrice)||0) * (Number(i.quantity)||0)).toFixed(2),
         eventMap[i.eventId] || '—',
         (i.notes || '').replace(/,/g,' '),
       ]),
