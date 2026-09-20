@@ -91,6 +91,13 @@ export const showEvent = async (req, res) => {
     }
     const event = { id: snap.id, ...snap.data() };
 
+    // Flag whether this event type requires payment (controls Payment QR display)
+    const PAYMENT_TYPES = ['pageant','talent','cultural','choral','dance','culinary','booth','sports','academic','other'];
+    event.isPaymentType = PAYMENT_TYPES.includes(event.type);
+    // Flag whether this event type uses prizes/rules
+    const PRIZE_TYPES = ['pageant','talent','choral','dance','culinary','academic','other'];
+    event.isPrizeType = PRIZE_TYPES.includes(event.type);
+
     const [cSnap, crSnap, finance] = await Promise.all([
       getDocs(collection(db, EVENTS, req.params.id, "contestants")),
       getDocs(collection(db, EVENTS, req.params.id, "criteria")),

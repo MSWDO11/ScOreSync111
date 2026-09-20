@@ -1,353 +1,412 @@
 {{> head }}
-<body class="min-h-screen flex flex-col" style="background:#0a0f1e">
+<body class="bg-slate-50 min-h-screen flex flex-col">
 {{> navbar }}
 <div class="flex flex-1 overflow-hidden">
 {{> sidebar }}
 <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
 
-  {{#if success_msg}}<div class="alert-success animate-fadeup">{{success_msg}}</div>{{/if}}
-  {{#if error_msg}}<div class="alert-error animate-fadeup">{{error_msg}}</div>{{/if}}
+  {{#if success_msg}}<div class="alert-success animate-fadeup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>{{success_msg}}</div>{{/if}}
+  {{#if error_msg}}<div class="alert-error animate-fadeup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/></svg>{{error_msg}}</div>{{/if}}
 
   <!-- ── Page Header ── -->
-  <div class="rounded-2xl overflow-hidden animate-fadeup" style="background:linear-gradient(135deg,#064e3b 0%,#059669 55%,#0f766e 100%);border:1px solid rgba(16,185,129,0.25)">
-    <div class="px-7 py-6 relative overflow-hidden">
-      <div class="absolute top-0 right-0 w-64 h-64 rounded-full translate-x-24 -translate-y-24" style="background:rgba(255,255,255,0.04)"></div>
-      <div class="relative flex items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2 mb-2 text-xs" style="color:rgba(110,231,183,0.7)">
-            <a href="/dashboard" style="color:rgba(110,231,183,0.9)" class="hover:underline">Dashboard</a>
-            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            <span>Ticket Sales &amp; Income</span>
-          </div>
-          <h1 class="text-white text-2xl font-extrabold tracking-tight">Ticket Sales &amp; Income</h1>
-          <p class="text-emerald-100 text-sm mt-1 opacity-80">Track tickets sold and income collected per event.</p>
-        </div>
-        <!-- KPIs + Add button -->
-        <div class="flex items-center gap-3 flex-shrink-0">
-          <div class="hidden sm:flex items-center gap-3">
-            <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15)">
-              <div class="text-white font-black text-xl leading-none">{{items.length}}</div>
-              <div class="text-emerald-100 text-[10px] font-bold uppercase tracking-wide mt-0.5">Records</div>
-            </div>
-            <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15)">
-              <div class="text-white font-black text-xl leading-none">{{totalItems}}</div>
-              <div class="text-emerald-100 text-[10px] font-bold uppercase tracking-wide mt-0.5">Tickets Sold</div>
-            </div>
-            <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15)">
-              <div class="text-white font-black text-xl leading-none">₱{{totalValue}}</div>
-              <div class="text-emerald-100 text-[10px] font-bold uppercase tracking-wide mt-0.5">Total Income</div>
-            </div>
-          </div>
-          {{#if isAdmin}}
-          <button onclick="openAddModal()"
-            class="flex items-center gap-2 px-5 py-3 rounded-xl font-extrabold text-sm flex-shrink-0 transition"
-            style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.28)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Record
-          </button>
-          {{/if}}
-        </div>
-      </div>
+  <div class="flex items-center justify-between animate-fadeup">
+    <div class="page-header mb-0">
+      <div class="breadcrumb"><a href="/dashboard">Dashboard</a></div>
+      <h1>Ticket Sales &amp; Income</h1>
+      <p>Payment updates and income tracking per event.</p>
     </div>
-  </div>
-
-  <!-- ── Filter bar ── -->
-  <div class="rounded-2xl px-5 py-4 animate-fadeup-1" style="background:#111827;border:1px solid rgba(255,255,255,0.07)">
-    <form method="GET" action="/inventory" class="flex flex-wrap items-end gap-3">
-      <div class="flex-1 min-w-[200px]">
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Filter by Event</label>
-        <select name="eventId" onchange="this.form.submit()" class="form-input-bare w-full">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <!-- Event filter -->
+      <form method="GET" action="/inventory">
+        <select name="eventId" onchange="this.form.submit()" class="form-input-bare text-sm" style="min-width:180px">
           <option value="">— All Events —</option>
           {{#each events}}
           <option value="{{id}}" {{#if (eq id ../filterEventId)}}selected{{/if}}>{{name}}</option>
           {{/each}}
         </select>
-      </div>
+      </form>
       {{#if filterEventId}}
-      <span class="px-3 py-2 rounded-xl text-xs font-bold" style="background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25)">
-        {{items.length}} records &middot; ₱{{totalValue}} income
-      </span>
-      <a href="/inventory" class="btn-sm btn-sm-gray flex-shrink-0">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <a href="/inventory" class="btn-sm btn-sm-gray text-xs">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         Clear
       </a>
-      <a href="/inventory/export?eventId={{filterEventId}}" class="btn-sm btn-sm-green flex-shrink-0">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
+      <a href="/inventory/export?eventId={{filterEventId}}" class="btn-sm btn-sm-green text-xs">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV
       </a>
       {{/if}}
-    </form>
-  </div>
-
-  <!-- ── Records Table ── -->
-  <div class="rounded-2xl overflow-hidden animate-fadeup-1" style="background:#111827;border:1px solid rgba(255,255,255,0.07)">
-
-    <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <h2 class="text-sm font-extrabold flex items-center gap-2" style="color:#e2e8f0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        {{#if selectedEvent}}{{selectedEvent.name}} — Ticket Sales{{else}}All Ticket Sales Records{{/if}}
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" style="background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25)">{{items.length}}</span>
-      </h2>
       {{#if isAdmin}}
-      <button onclick="openAddModal()" class="btn-sm btn-sm-green text-xs">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button onclick="openAddModal()" class="btn-primary text-sm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Record
       </button>
       {{/if}}
     </div>
+  </div>
 
-    {{#if items.length}}
-    <div class="overflow-x-auto">
-      <table class="data-table w-full">
-        <thead>
-          <tr>
-            <th class="w-8 text-center">#</th>
-            <th>Ticket / Income Type</th>
-            {{#unless filterEventId}}<th>Event</th>{{/unless}}
-            <th class="text-center">Qty Sold</th>
-            <th class="text-center">Unit Price</th>
-            <th class="text-center">Total Income</th>
-            <th>Notes</th>
-            {{#if isAdmin}}<th class="text-right w-20">Actions</th>{{/if}}
-          </tr>
-        </thead>
-        <tbody>
+  <!-- ── KPI Cards Row ── -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fadeup-1">
+
+    <!-- Total Income -->
+    <div class="card-flat p-5 relative overflow-hidden">
+      <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(135deg,rgba(16,185,129,0.07),transparent)"></div>
+      <div class="relative">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center grad-green">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Income</span>
+          </div>
+          <span class="badge badge-green text-[10px]">+{{items.length}} entries</span>
+        </div>
+        <div class="text-3xl font-black text-slate-900 tracking-tight">₱{{totalValue}}</div>
+        <div class="mt-3 h-10" id="sparkline-income"></div>
+      </div>
+    </div>
+
+    <!-- Tickets Sold -->
+    <div class="card-flat p-5 relative overflow-hidden">
+      <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(135deg,rgba(245,158,11,0.07),transparent)"></div>
+      <div class="relative">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center grad-gold">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+            </div>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tickets Sold</span>
+          </div>
+          <span class="badge badge-yellow text-[10px]">{{items.length}} records</span>
+        </div>
+        <div class="text-3xl font-black text-slate-900 tracking-tight">{{totalItems}}</div>
+        <div class="mt-3 h-10" id="sparkline-tickets"></div>
+      </div>
+    </div>
+
+    <!-- Avg per Ticket -->
+    <div class="card-flat p-5 relative overflow-hidden">
+      <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(135deg,rgba(99,102,241,0.07),transparent)"></div>
+      <div class="relative">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center grad-purple">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Avg per Ticket</span>
+          </div>
+          <span class="badge badge-purple text-[10px]">average</span>
+        </div>
+        <div class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-avg">₱0.00</div>
+        <div class="mt-3 h-10" id="sparkline-avg"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Main Content: Chart + Type Breakdown | Recent Records ── -->
+  <div class="grid lg:grid-cols-3 gap-5 animate-fadeup-1">
+
+    <!-- LEFT 2/3: Bar Chart + Records Table -->
+    <div class="lg:col-span-2 space-y-5">
+
+      <!-- Income Bar Chart -->
+      <div class="card-flat p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-extrabold text-slate-800 text-base">Income by Record</h2>
+            <p class="text-xs text-slate-400 mt-0.5">All ticket sales entries — bar height = total income</p>
+          </div>
+          <span class="badge badge-green text-xs" id="chart-total-badge">₱{{totalValue}} total</span>
+        </div>
+        <div style="height:200px;position:relative">
+          <canvas id="income-bar-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Records Table -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+            {{#if selectedEvent}}{{selectedEvent.name}} — Records{{else}}All Records{{/if}}
+            <span class="ml-2 badge badge-green text-[10px]">{{items.length}}</span>
+          </h2>
+          {{#if isAdmin}}
+          <button onclick="openAddModal()" class="btn-primary btn-sm text-xs px-3 py-1.5">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+          {{/if}}
+        </div>
+
+        {{#if items.length}}
+        <div class="divide-y divide-slate-50">
           {{#each items}}
-          <tr>
-            <td class="text-center text-xs font-mono" style="color:#374151">{{@index}}</td>
-            <!-- Ticket type -->
-            <td>
-              <div class="flex items-center gap-3">
-                {{#if photo}}
-                <img src="{{photo}}" alt="" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" style="border:1px solid rgba(255,255,255,0.08)"/>
-                {{else}}
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.10);border:1px solid rgba(16,185,129,0.18)">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-                </div>
-                {{/if}}
-                <div class="font-semibold text-sm" style="color:#e2e8f0">{{ticketType}}</div>
+          <div class="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 transition group">
+            <div class="flex items-center gap-3">
+              {{#if photo}}
+              <img src="{{photo}}" alt="" class="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-slate-100"/>
+              {{else}}
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-50 border border-emerald-100">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
               </div>
-            </td>
-            {{#unless ../filterEventId}}
-            <td class="text-xs" style="color:#475569">{{eventName}}</td>
-            {{/unless}}
-            <!-- Qty -->
-            <td class="text-center font-black text-sm" style="color:#e2e8f0">{{quantity}}</td>
-            <!-- Unit price -->
-            <td class="text-center text-sm" style="color:#94a3b8">₱{{unitPrice}}</td>
-            <!-- Total -->
-            <td class="text-center">
-              <span class="font-black text-sm" style="color:#6ee7b7">₱{{totalValue}}</span>
-            </td>
-            <!-- Notes -->
-            <td class="text-xs truncate max-w-[180px]" style="color:#374151">{{#if notes}}{{notes}}{{else}}—{{/if}}</td>
-            <!-- Actions -->
-            {{#if ../isAdmin}}
-            <td class="text-right">
-              <div class="flex items-center justify-end gap-1">
+              {{/if}}
+              <div>
+                <div class="font-semibold text-slate-800 text-sm">{{ticketType}}</div>
+                <div class="text-slate-400 text-xs mt-0.5">
+                  {{#unless ../filterEventId}}{{eventName}} &bull; {{/unless}}
+                  {{quantity}} × ₱{{unitPrice}}
+                  {{#if notes}} &bull; {{notes}}{{/if}}
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <span class="font-extrabold text-emerald-600 text-sm">+₱{{totalValue}}</span>
+              {{#if ../isAdmin}}
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                 <button type="button"
                   onclick="openEditModal('{{id}}','{{ticketType}}','{{quantity}}','{{unitPrice}}','{{notes}}','{{eventId}}','{{photo}}')"
-                  class="btn-sm btn-sm-gray text-xs px-2.5 py-1.5">
+                  class="btn-sm btn-sm-gray text-xs px-2 py-1">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
-                <form method="POST" action="/inventory/{{id}}/delete" class="inline" onsubmit="return confirm('Remove this record?')">
+                <form method="POST" action="/inventory/{{id}}/delete" class="inline" onsubmit="return confirm('Remove?')">
                   <input type="hidden" name="eventId" value="{{eventId}}"/>
-                  <button class="btn-sm btn-sm-red text-xs px-2.5 py-1.5">
+                  <button class="btn-sm btn-sm-red text-xs px-2 py-1">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                   </button>
                 </form>
               </div>
-            </td>
-            {{/if}}
-          </tr>
+              {{/if}}
+            </div>
+          </div>
           {{/each}}
-        </tbody>
-        <tfoot>
-          <tr style="border-top:2px solid rgba(16,185,129,0.2)">
-            <td colspan="{{#if filterEventId}}4{{else}}5{{/if}}" class="px-6 py-3 text-xs font-extrabold uppercase tracking-widest text-right" style="color:#4b5563">
-              Total Tickets Sold: <span style="color:#e2e8f0">{{totalItems}}</span>
-            </td>
-            <td class="px-6 py-3 text-center font-black text-base" style="color:#6ee7b7">₱{{totalValue}}</td>
-            <td></td>
-            {{#if isAdmin}}<td></td>{{/if}}
-          </tr>
-        </tfoot>
-      </table>
+        </div>
+        <!-- Footer total -->
+        <div class="px-5 py-3 flex items-center justify-between" style="border-top:2px solid #f1f5f9;background:#f8fafc">
+          <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wide">Total · {{totalItems}} tickets</span>
+          <span class="font-black text-emerald-600 text-base">₱{{totalValue}}</span>
+        </div>
+
+        {{else}}
+        <div class="py-14 text-center text-slate-400 text-sm">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" class="mx-auto mb-4"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+          <p class="font-semibold text-slate-500 mb-1">{{#if filterEventId}}No records for this event yet.{{else}}No ticket sales records yet.{{/if}}</p>
+          <p class="text-xs text-slate-400 mb-5">{{#if filterEventId}}Add ticket types and sales to track income.{{else}}Select an event or add your first record.{{/if}}</p>
+          {{#if isAdmin}}
+          <button onclick="openAddModal()" class="btn-primary inline-flex">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add First Record
+          </button>
+          {{/if}}
+        </div>
+        {{/if}}
+      </div>
     </div>
 
-    {{else}}
-    <div class="py-20 text-center">
-      <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15)">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="1.5">
-          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/>
-        </svg>
+    <!-- RIGHT 1/3: Donut breakdown + top types -->
+    <div class="space-y-5">
+
+      <!-- Donut: Income breakdown by type -->
+      <div class="card-flat p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-extrabold text-slate-800 text-sm">Income Breakdown</h2>
+          <span class="text-xs text-slate-400">by type</span>
+        </div>
+        <div class="flex items-center justify-center my-2" style="height:160px;position:relative">
+          <canvas id="income-donut"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div class="text-xs font-bold text-slate-400">Total</div>
+            <div class="text-xl font-black text-slate-800" id="donut-center">₱{{totalValue}}</div>
+          </div>
+        </div>
+        <div id="donut-legend" class="space-y-2 mt-4"></div>
       </div>
-      <p class="font-bold text-sm mb-1" style="color:#e2e8f0">{{#if filterEventId}}No ticket records for this event yet{{else}}No ticket sales records yet{{/if}}</p>
-      <p class="text-xs mb-6" style="color:#374151">{{#if filterEventId}}Add ticket types and sales to track income for this event.{{else}}Select an event to filter, or add your first record.{{/if}}</p>
-      {{#if isAdmin}}
-      <button onclick="openAddModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-extrabold transition"
-        style="background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add First Record
-      </button>
-      {{/if}}
+
+      <!-- Top ticket types list -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Recent Sales
+          </h2>
+          <span class="text-xs text-slate-400">See All</span>
+        </div>
+        {{#if items.length}}
+        <div class="divide-y divide-slate-50">
+          {{#each items}}
+          {{#if @first}}
+          <div class="px-5 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 grad-green shadow-sm">
+                {{#if photo}}<img src="{{photo}}" class="w-full h-full rounded-full object-cover"/>{{else}}₱{{/if}}
+              </div>
+              <div>
+                <div class="font-semibold text-slate-800 text-sm">{{ticketType}}</div>
+                <div class="text-slate-400 text-xs">just now</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-emerald-600 text-sm">+₱{{totalValue}}</span>
+          </div>
+          {{/if}}
+          {{#unless @first}}
+          {{#if @index}}
+          {{#if (lte @index 6)}}
+          <div class="px-5 py-3 flex items-center justify-between hover:bg-slate-50 transition">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 grad-blue shadow-sm">
+                {{#if photo}}<img src="{{photo}}" class="w-full h-full rounded-full object-cover"/>{{else}}T{{/if}}
+              </div>
+              <div>
+                <div class="font-semibold text-slate-700 text-sm">{{ticketType}}</div>
+                <div class="text-slate-400 text-xs">{{#unless ../filterEventId}}{{eventName}}{{/unless}}</div>
+              </div>
+            </div>
+            <span class="font-extrabold text-emerald-600 text-sm">+₱{{totalValue}}</span>
+          </div>
+          {{/if}}
+          {{/if}}
+          {{/unless}}
+          {{/each}}
+        </div>
+        {{else}}
+        <div class="px-5 py-8 text-center text-slate-400 text-sm">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" class="mx-auto mb-2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+          No sales yet
+        </div>
+        {{/if}}
+      </div>
+
     </div>
-    {{/if}}
   </div>
 
 </main>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ADD RECORD MODAL
-══════════════════════════════════════════ -->
-<div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.75)">
-  <div class="w-full max-w-md mx-4 rounded-2xl overflow-hidden shadow-2xl" style="background:#111827;border:1px solid rgba(16,185,129,0.2)">
-    <div class="px-6 py-5 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(16,185,129,0.07)">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.35)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-        <div>
-          <h3 class="font-extrabold text-sm" style="color:#e2e8f0">Add Ticket / Income Record</h3>
-          <p class="text-[11px]" style="color:#374151">Record ticket sales or other income</p>
-        </div>
+<!-- ══ ADD RECORD MODAL ══ -->
+<div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.55)">
+  <div class="card-flat w-full max-w-md mx-4 shadow-2xl">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+      <div class="w-8 h-8 grad-green rounded-lg flex items-center justify-center shadow-sm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
-      <button onclick="closeAddModal()" style="color:#475569" class="hover:text-white transition">
+      <div>
+        <h3 class="font-bold text-slate-800">Add Ticket / Income Record</h3>
+        <p class="text-slate-400 text-xs">Record ticket sales or other income</p>
+      </div>
+      <button onclick="closeAddModal()" class="ml-auto text-slate-400 hover:text-slate-700 transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <form method="POST" action="/inventory" class="px-6 py-6 space-y-4">
-      <!-- Event -->
+    <form method="POST" action="/inventory" class="px-6 py-5 space-y-4">
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Event <span style="color:#ef4444">*</span></label>
-        <select name="eventId" required class="form-input-bare w-full">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Event <span class="text-red-500">*</span></label>
+        <select name="eventId" required class="form-input-bare bg-white">
           <option value="">Select an event…</option>
           {{#each events}}
           <option value="{{id}}" {{#if (eq id ../filterEventId)}}selected{{/if}}>{{name}}</option>
           {{/each}}
         </select>
       </div>
-
-      <!-- Ticket / Income type -->
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Ticket / Income Type <span style="color:#ef4444">*</span></label>
-        <input type="text" name="ticketType" placeholder="e.g. General Admission, VIP Ticket, Sponsor Fee…" required class="form-input-bare"/>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Ticket / Income Type <span class="text-red-500">*</span></label>
+        <input type="text" name="ticketType" placeholder="e.g. General Admission, VIP, Sponsor Fee…" required class="form-input-bare"/>
       </div>
-
-      <!-- Quick type presets -->
+      <!-- Quick presets -->
       <div class="flex flex-wrap gap-1.5">
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest w-full" style="color:#4b5563">Quick Presets</label>
-        <button type="button" onclick="setTicketType('General Admission')"  class="preset-pill">General Admission</button>
-        <button type="button" onclick="setTicketType('VIP Ticket')"         class="preset-pill">VIP Ticket</button>
-        <button type="button" onclick="setTicketType('Student Ticket')"     class="preset-pill">Student Ticket</button>
-        <button type="button" onclick="setTicketType('Sponsor Fee')"        class="preset-pill">Sponsor Fee</button>
-        <button type="button" onclick="setTicketType('Registration Fee')"   class="preset-pill">Registration Fee</button>
-        <button type="button" onclick="setTicketType('Donation')"           class="preset-pill">Donation</button>
-        <button type="button" onclick="setTicketType('Merchandise')"        class="preset-pill">Merchandise</button>
-        <button type="button" onclick="setTicketType('LGU Grant')"          class="preset-pill">LGU Grant</button>
+        <button type="button" onclick="setTicketType('General Admission')" class="preset-pill">General Admission</button>
+        <button type="button" onclick="setTicketType('VIP Ticket')"        class="preset-pill">VIP Ticket</button>
+        <button type="button" onclick="setTicketType('Student Ticket')"    class="preset-pill">Student Ticket</button>
+        <button type="button" onclick="setTicketType('Sponsor Fee')"       class="preset-pill">Sponsor Fee</button>
+        <button type="button" onclick="setTicketType('Registration Fee')"  class="preset-pill">Registration Fee</button>
+        <button type="button" onclick="setTicketType('Donation')"          class="preset-pill">Donation</button>
+        <button type="button" onclick="setTicketType('Merchandise')"       class="preset-pill">Merchandise</button>
+        <button type="button" onclick="setTicketType('LGU Grant')"         class="preset-pill">LGU Grant</button>
       </div>
-
-      <!-- Qty + Price -->
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Quantity / Count</label>
-          <input type="number" name="quantity" value="1" min="0" class="form-input-bare"/>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Quantity</label>
+          <input type="number" name="quantity" value="1" min="0" class="form-input-bare" oninput="calcPreview()"/>
         </div>
         <div>
-          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit Price (₱)</label>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Unit Price (₱)</label>
           <input type="number" name="unitPrice" placeholder="0.00" min="0" step="0.01" id="add-unit-price" oninput="calcPreview()" class="form-input-bare"/>
         </div>
       </div>
-
-      <!-- Total preview -->
-      <div class="flex items-center justify-between px-4 py-3 rounded-xl" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15)">
-        <span class="text-xs font-extrabold uppercase tracking-widest" style="color:#4b5563">Est. Total Income</span>
-        <span id="add-total-preview" class="font-black text-base" style="color:#6ee7b7">₱0.00</span>
+      <!-- Live total -->
+      <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+        <span class="text-xs font-semibold text-emerald-700">Estimated Total</span>
+        <span id="add-total-preview" class="font-extrabold text-emerald-700 text-base">₱0.00</span>
       </div>
-
-      <!-- Photo (optional receipt/QR) -->
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Attachment <span style="color:#1f2937;font-weight:400;font-size:9px;text-transform:none">optional — receipt / QR</span></label>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Attachment <span class="text-slate-300 font-normal text-[10px] normal-case">optional</span></label>
         <div id="inv-photo-dropzone" onclick="document.getElementById('inv-photo-file').click()"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition"
-          style="border:2px dashed rgba(16,185,129,0.2);background:rgba(16,185,129,0.04)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          class="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer border-2 border-dashed border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           <div>
-            <div class="text-xs font-semibold" style="color:#10b981">Upload attachment</div>
-            <div class="text-[10px]" style="color:#374151">PNG/JPG · max 2MB</div>
+            <div class="text-xs font-semibold text-emerald-700">Upload receipt / QR</div>
+            <div class="text-[10px] text-slate-400">PNG/JPG · max 2MB</div>
           </div>
         </div>
         <input type="file" id="inv-photo-file" accept="image/*" class="hidden" onchange="handleInvPhoto(this)"/>
         <input type="hidden" name="photo" id="inv-photo-b64"/>
         <div id="inv-photo-preview" class="hidden mt-2 flex items-center gap-3">
-          <img id="inv-photo-img" src="" alt="" class="w-14 h-14 rounded-xl object-cover" style="border:1px solid rgba(255,255,255,0.08)"/>
+          <img id="inv-photo-img" src="" alt="" class="w-12 h-12 rounded-xl object-cover border border-slate-200"/>
           <button type="button" onclick="clearInvPhoto()" class="btn-sm btn-sm-red text-xs">Remove</button>
         </div>
       </div>
-
-      <!-- Notes -->
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Notes</label>
-        <textarea name="notes" rows="2" placeholder="e.g. Sold at gate, pre-sold online…" class="form-input-bare resize-none"></textarea>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Notes</label>
+        <textarea name="notes" rows="2" placeholder="e.g. Sold at gate, online pre-sale…" class="form-input-bare resize-none"></textarea>
       </div>
-
       <div class="flex gap-3 pt-1">
-        <button type="submit" class="btn-primary flex-1 py-3 text-sm justify-center"
+        <button type="submit" class="btn-primary flex-1 py-2.5 text-sm justify-center"
           style="background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 4px 14px rgba(16,185,129,0.3)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Save Record
         </button>
-        <button type="button" onclick="closeAddModal()" class="btn-secondary px-6 py-3 text-sm">Cancel</button>
+        <button type="button" onclick="closeAddModal()" class="btn-secondary px-5 py-2.5 text-sm">Cancel</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     EDIT RECORD MODAL
-══════════════════════════════════════════ -->
-<div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.75)">
-  <div class="w-full max-w-md mx-4 rounded-2xl overflow-hidden shadow-2xl" style="background:#111827;border:1px solid rgba(255,255,255,0.10)">
-    <div class="px-6 py-5 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.07)">
-      <h3 class="font-extrabold text-sm" style="color:#e2e8f0">Edit Record</h3>
-      <button type="button" onclick="closeEditModal()" style="color:#475569" class="hover:text-white transition">
+<!-- ══ EDIT MODAL ══ -->
+<div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.55)">
+  <div class="card-flat w-full max-w-md mx-4 shadow-2xl">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 class="font-bold text-slate-800">Edit Record</h3>
+      <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <form id="edit-form" method="POST" action="" class="px-6 py-6 space-y-4">
+    <form id="edit-form" method="POST" action="" class="px-6 py-5 space-y-4">
       <input type="hidden" name="eventId" id="edit-eventId"/>
       <input type="hidden" name="photo"   id="edit-photo-b64"/>
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Ticket / Income Type <span style="color:#ef4444">*</span></label>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Type <span class="text-red-500">*</span></label>
         <input type="text" name="ticketType" id="edit-ticketType" required class="form-input-bare"/>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Quantity</label>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Quantity</label>
           <input type="number" name="quantity" id="edit-quantity" min="0" class="form-input-bare"/>
         </div>
         <div>
-          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit Price (₱)</label>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Unit Price (₱)</label>
           <input type="number" name="unitPrice" id="edit-unitPrice" min="0" step="0.01" class="form-input-bare"/>
         </div>
       </div>
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Notes</label>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Notes</label>
         <textarea name="notes" id="edit-notes" rows="2" class="form-input-bare resize-none"></textarea>
       </div>
-      <!-- Photo -->
       <div>
-        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Attachment</label>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Attachment</label>
         <div id="edit-photo-existing" class="hidden mb-2">
-          <img id="edit-photo-img" src="" alt="" class="w-14 h-14 rounded-xl object-cover" style="border:1px solid rgba(255,255,255,0.08)"/>
+          <img id="edit-photo-img" src="" alt="" class="w-12 h-12 rounded-lg object-cover border border-slate-200"/>
         </div>
         <div class="flex gap-2">
-          <button type="button" onclick="document.getElementById('edit-photo-file').click()" class="btn-sm btn-sm-gray text-xs flex-1 justify-center">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Replace
-          </button>
+          <button type="button" onclick="document.getElementById('edit-photo-file').click()" class="btn-sm btn-sm-gray text-xs flex-1 justify-center">Replace</button>
           <button type="button" onclick="clearEditPhoto()" class="btn-sm btn-sm-red text-xs">Remove</button>
         </div>
         <input type="file" id="edit-photo-file" accept="image/*" class="hidden" onchange="handleEditPhoto(this)"/>
@@ -362,54 +421,162 @@
 
 <style>
 .preset-pill {
-  padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
-  cursor: pointer; transition: all 0.15s;
-  background: rgba(255,255,255,0.05); color: #64748b;
-  border: 1px solid rgba(255,255,255,0.08);
+  padding:4px 10px; border-radius:999px; font-size:0.7rem; font-weight:700;
+  cursor:pointer; transition:all 0.15s;
+  background:#f8fafc; color:#475569; border:1px solid #e2e8f0;
 }
-.preset-pill:hover { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.3); }
+.preset-pill:hover { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
 </style>
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-/* ── Add modal ── */
+/* ── Build chart data from server items ── */
+const ITEMS = [
+  {{#each items}}
+  { label: "{{ticketType}}", total: {{totalValue}}, qty: {{quantity}}, price: {{unitPrice}} },
+  {{/each}}
+];
+
+const TOTAL_VALUE = {{#if totalValue}}{{totalValue}}{{else}}0{{/if}};
+const TOTAL_QTY   = {{#if totalItems}}{{totalItems}}{{else}}0{{/if}};
+
+/* ── KPI avg ── */
+const avgEl = document.getElementById('kpi-avg');
+if (avgEl) {
+  const avg = TOTAL_QTY > 0 ? (TOTAL_VALUE / TOTAL_QTY) : 0;
+  avgEl.textContent = '₱' + avg.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+/* ── Colour palette ── */
+const COLORS = ['#10b981','#f59e0b','#6366f1','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+
+/* ── Bar chart ── */
+const barCtx = document.getElementById('income-bar-chart');
+if (barCtx && ITEMS.length) {
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: ITEMS.map(i => i.label.length > 16 ? i.label.slice(0,14)+'…' : i.label),
+      datasets: [{
+        data:            ITEMS.map(i => i.total),
+        backgroundColor: ITEMS.map((_, idx) => COLORS[idx % COLORS.length] + '33'),
+        borderColor:     ITEMS.map((_, idx) => COLORS[idx % COLORS.length]),
+        borderWidth:     2,
+        borderRadius:    8,
+        borderSkipped:   false,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ' ₱' + ctx.parsed.y.toLocaleString('en-PH', {minimumFractionDigits:2}) }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' }, color: '#94a3b8' } },
+        y: { grid: { color: '#f1f5f9' }, ticks: {
+          font: { size: 11 }, color: '#94a3b8',
+          callback: v => '₱' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v)
+        }},
+      },
+    },
+  });
+} else if (barCtx) {
+  barCtx.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-slate-300 text-sm font-semibold">No data yet</div>';
+}
+
+/* ── Donut chart ── */
+const donutCtx = document.getElementById('income-donut');
+if (donutCtx && ITEMS.length) {
+  // Group by label
+  const grouped = {};
+  ITEMS.forEach(i => { grouped[i.label] = (grouped[i.label]||0) + i.total; });
+  const labels = Object.keys(grouped);
+  const values = Object.values(grouped);
+
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: COLORS.slice(0, labels.length), borderWidth: 3, borderColor: '#fff', hoverOffset: 6 }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ₱' + ctx.parsed.toLocaleString('en-PH', {minimumFractionDigits:2}) } }
+      },
+    },
+  });
+
+  /* Legend */
+  const legend = document.getElementById('donut-legend');
+  if (legend) {
+    labels.forEach((lbl, i) => {
+      const pct = TOTAL_VALUE > 0 ? ((values[i]/TOTAL_VALUE)*100).toFixed(0) : 0;
+      legend.innerHTML += `
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${COLORS[i%COLORS.length]}"></span>
+            <span class="font-semibold text-slate-700 truncate max-w-[110px]">${lbl}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-800">₱${values[i].toLocaleString('en-PH',{minimumFractionDigits:2})}</span>
+            <span class="text-slate-400">${pct}%</span>
+          </div>
+        </div>`;
+    });
+  }
+} else if (donutCtx) {
+  donutCtx.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-slate-300 text-sm font-semibold">No data</div>';
+}
+
+/* ── Sparklines (mini bar) ── */
+['sparkline-income','sparkline-tickets','sparkline-avg'].forEach((id,si) => {
+  const el = document.getElementById(id);
+  if (!el || !ITEMS.length) return;
+  const vals = ITEMS.map(i => si===1 ? i.qty : i.total);
+  const max  = Math.max(...vals, 1);
+  el.innerHTML = `<svg width="100%" height="40" viewBox="0 0 ${vals.length*12+4} 40" preserveAspectRatio="none">
+    ${vals.map((v,i) => {
+      const h = Math.max(4, (v/max)*32);
+      const colors = ['#10b981','#f59e0b','#6366f1'];
+      return `<rect x="${i*12+2}" y="${40-h}" width="8" height="${h}" rx="2" fill="${colors[si]}55"/>`;
+    }).join('')}
+  </svg>`;
+});
+
+/* ── Modals ── */
 function openAddModal()  { document.getElementById('add-modal').classList.remove('hidden'); }
 function closeAddModal() { document.getElementById('add-modal').classList.add('hidden'); }
-document.getElementById('add-modal').addEventListener('click', function(e) { if(e.target===this) closeAddModal(); });
+document.getElementById('add-modal').addEventListener('click', e => { if(e.target===document.getElementById('add-modal')) closeAddModal(); });
 
-/* ── Edit modal ── */
 function openEditModal(id, ticketType, qty, unitPrice, notes, eventId, photo) {
-  document.getElementById('edit-form').action          = '/inventory/' + id + '/update';
-  document.getElementById('edit-ticketType').value     = ticketType;
-  document.getElementById('edit-quantity').value       = qty;
-  document.getElementById('edit-unitPrice').value      = unitPrice;
-  document.getElementById('edit-notes').value          = notes;
-  document.getElementById('edit-eventId').value        = eventId;
-  document.getElementById('edit-photo-b64').value      = photo || '';
-  const imgEl   = document.getElementById('edit-photo-img');
-  const imgWrap = document.getElementById('edit-photo-existing');
-  if (photo) { imgEl.src = photo; imgWrap.classList.remove('hidden'); }
-  else        { imgWrap.classList.add('hidden'); }
+  document.getElementById('edit-form').action       = '/inventory/' + id + '/update';
+  document.getElementById('edit-ticketType').value  = ticketType;
+  document.getElementById('edit-quantity').value    = qty;
+  document.getElementById('edit-unitPrice').value   = unitPrice;
+  document.getElementById('edit-notes').value       = notes;
+  document.getElementById('edit-eventId').value     = eventId;
+  document.getElementById('edit-photo-b64').value   = photo || '';
+  const imgEl = document.getElementById('edit-photo-img'), imgWrap = document.getElementById('edit-photo-existing');
+  if (photo) { imgEl.src = photo; imgWrap.classList.remove('hidden'); } else imgWrap.classList.add('hidden');
   document.getElementById('edit-modal').classList.remove('hidden');
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
-document.getElementById('edit-modal').addEventListener('click', function(e) { if(e.target===this) closeEditModal(); });
+document.getElementById('edit-modal').addEventListener('click', e => { if(e.target===document.getElementById('edit-modal')) closeEditModal(); });
 
-/* ── Quick preset type setter ── */
-function setTicketType(val) {
-  document.querySelector('[name=ticketType]').value = val;
-}
+function setTicketType(val) { document.querySelector('[name=ticketType]').value = val; }
 
-/* ── Live total preview ── */
 function calcPreview() {
   const qty   = parseFloat(document.querySelector('[name=quantity]')?.value || 0);
   const price = parseFloat(document.getElementById('add-unit-price')?.value || 0);
-  const total = (qty * price).toFixed(2);
-  const el = document.getElementById('add-total-preview');
-  if (el) el.textContent = '₱' + parseFloat(total).toLocaleString('en-PH', {minimumFractionDigits:2});
+  const el    = document.getElementById('add-total-preview');
+  if (el) el.textContent = '₱' + (qty*price).toLocaleString('en-PH',{minimumFractionDigits:2});
 }
 document.querySelector('[name=quantity]')?.addEventListener('input', calcPreview);
 
-/* ── Photo handlers ── */
 function handleInvPhoto(input) {
   const file = input.files[0]; if (!file) return;
   if (file.size > 2*1024*1024) { alert('Max 2MB'); input.value=''; return; }
@@ -433,8 +600,7 @@ function handleEditPhoto(input) {
   const r = new FileReader();
   r.onload = e => {
     document.getElementById('edit-photo-b64').value = e.target.result;
-    const img = document.getElementById('edit-photo-img');
-    img.src = e.target.result;
+    document.getElementById('edit-photo-img').src   = e.target.result;
     document.getElementById('edit-photo-existing').classList.remove('hidden');
   };
   r.readAsDataURL(file);

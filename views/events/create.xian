@@ -115,7 +115,7 @@
           </div>
         </div>
 
-        <div class="card-flat">
+        <div class="card-flat" id="prizes-rules-card">
           <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
             <div class="w-8 h-8 grad-gold rounded-lg flex items-center justify-center shadow-sm">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
@@ -186,7 +186,7 @@
         </div>
 
         <!-- Payment QR Code Card -->
-        <div class="card-flat" style="border-color:#d1fae5">
+        <div class="card-flat hidden" id="payment-qr-card" style="border-color:#d1fae5">
           <div class="px-6 py-4 border-b border-emerald-100 flex items-center gap-3">
             <div class="w-8 h-8 grad-green rounded-lg flex items-center justify-center shadow-sm">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -270,20 +270,46 @@ function handleVenueSelect(sel) {
   }
 }
 
-/* ── Other LGU type auto-show ── */
+/* ── Event type-based field visibility ── */
+// Types that need Prizes & Rules
+const PRIZE_TYPES   = ['pageant','talent','choral','dance','culinary','academic','other'];
+// Types that normally charge admission/registration (show Payment QR)
+const PAYMENT_TYPES = ['pageant','talent','cultural','choral','dance','culinary','booth','sports','academic','other'];
+
 function handleEventType(sel) {
-  const wrap  = document.getElementById('other-lgu-wrap');
-  const input = document.getElementById('other-lgu-input');
-  if (sel.value === 'other') {
-    wrap.classList.remove('hidden');
-    input.setAttribute('required', 'required');
-    input.focus();
+  const type = sel.value;
+
+  // Other LGU — show specify field
+  const otherWrap  = document.getElementById('other-lgu-wrap');
+  const otherInput = document.getElementById('other-lgu-input');
+  if (type === 'other') {
+    otherWrap.classList.remove('hidden');
+    otherInput.setAttribute('required', 'required');
+    otherInput.focus();
   } else {
-    wrap.classList.add('hidden');
-    input.removeAttribute('required');
-    input.value = '';
+    otherWrap.classList.add('hidden');
+    otherInput.removeAttribute('required');
+    otherInput.value = '';
+  }
+
+  // Prizes & Rules — show only for prize-based event types
+  const prizesCard = document.getElementById('prizes-rules-card');
+  if (prizesCard) {
+    prizesCard.classList.toggle('hidden', !PRIZE_TYPES.includes(type));
+  }
+
+  // Payment QR — show only for paid event types
+  const paymentCard = document.getElementById('payment-qr-card');
+  if (paymentCard) {
+    paymentCard.classList.toggle('hidden', !PAYMENT_TYPES.includes(type));
   }
 }
+
+// Run on page load with default selected type
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('event-type-select');
+  if (sel) handleEventType(sel);
+});
 
 /* ── Payment QR ── */
 function handleCreateQRUpload(input) {
