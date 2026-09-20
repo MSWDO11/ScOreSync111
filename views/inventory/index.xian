@@ -1,33 +1,42 @@
 {{> head }}
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col" style="background:#0a0f1e">
 {{> navbar }}
 <div class="flex flex-1 overflow-hidden">
 {{> sidebar }}
 <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
 
-  {{#if success_msg}}<div class="alert-success animate-fadeup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>{{success_msg}}</div>{{/if}}
-  {{#if error_msg}}<div class="alert-error animate-fadeup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{error_msg}}</div>{{/if}}
+  {{#if success_msg}}<div class="alert-success animate-fadeup">{{success_msg}}</div>{{/if}}
+  {{#if error_msg}}<div class="alert-error animate-fadeup">{{error_msg}}</div>{{/if}}
 
-  <!-- Page Header -->
-  <div class="card-flat overflow-hidden animate-fadeup">
-    <div class="px-7 py-6 relative overflow-hidden" style="background:linear-gradient(135deg,#92400e,#f59e0b)">
-      <div class="absolute top-0 right-0 w-48 h-48 rounded-full translate-x-16 -translate-y-16" style="background:rgba(255,255,255,0.06)"></div>
-      <div class="relative flex items-start justify-between gap-4">
+  <!-- ── Page Header ── -->
+  <div class="rounded-2xl overflow-hidden animate-fadeup" style="background:linear-gradient(135deg,#0f2156 0%,#1a56db 60%,#312e81 100%);border:1px solid rgba(99,102,241,0.2)">
+    <div class="px-7 py-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 rounded-full translate-x-24 -translate-y-24" style="background:rgba(255,255,255,0.04)"></div>
+      <div class="absolute bottom-0 left-1/3 w-40 h-40 rounded-full translate-y-16" style="background:rgba(99,102,241,0.08)"></div>
+      <div class="relative flex items-center justify-between gap-4">
         <div>
-          <div class="breadcrumb mb-2" style="color:rgba(254,243,199,0.8)">
-            <a href="/dashboard" style="color:rgba(254,243,199,0.9)">Dashboard</a>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          <div class="flex items-center gap-2 mb-2 text-xs" style="color:rgba(165,180,252,0.7)">
+            <a href="/dashboard" style="color:rgba(165,180,252,0.9)" class="hover:underline">Dashboard</a>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             <span>Inventory</span>
           </div>
           <h1 class="text-white text-2xl font-extrabold tracking-tight">Event Inventory</h1>
-          <p class="text-amber-100 text-sm mt-1 opacity-80">Track equipment, props, and supplies per event.</p>
+          <p class="text-blue-200 text-sm mt-1 opacity-80">Track equipment, props, supplies, and awards per event.</p>
         </div>
-        <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center" style="background:rgba(255,255,255,0.15)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
+        <!-- Summary KPIs -->
+        <div class="hidden sm:flex items-center gap-3 flex-shrink-0">
+          <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12)">
+            <div class="text-white font-black text-xl leading-none">{{items.length}}</div>
+            <div class="text-blue-200 text-[10px] font-bold uppercase tracking-wide mt-0.5">Items</div>
+          </div>
+          <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12)">
+            <div class="text-white font-black text-xl leading-none">{{totalItems}}</div>
+            <div class="text-blue-200 text-[10px] font-bold uppercase tracking-wide mt-0.5">Total Qty</div>
+          </div>
+          <div class="px-4 py-3 rounded-xl text-center" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12)">
+            <div class="text-white font-black text-xl leading-none">₱{{totalValue}}</div>
+            <div class="text-blue-200 text-[10px] font-bold uppercase tracking-wide mt-0.5">Est. Value</div>
+          </div>
         </div>
       </div>
     </div>
@@ -35,15 +44,15 @@
 
   <div class="grid lg:grid-cols-3 gap-5 animate-fadeup-1">
 
-    <!-- LEFT: Filter + Table -->
+    <!-- ── LEFT: Filter + Table ── -->
     <div class="lg:col-span-2 space-y-4">
 
-      <!-- Event Filter -->
-      <div class="card-flat px-5 py-4">
+      <!-- Filter bar -->
+      <div class="rounded-2xl px-5 py-4" style="background:#111827;border:1px solid rgba(255,255,255,0.07)">
         <form method="GET" action="/inventory" class="flex flex-wrap items-end gap-3">
           <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Filter by Event</label>
-            <select name="eventId" onchange="this.form.submit()" class="form-input-bare bg-white w-full">
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Filter by Event</label>
+            <select name="eventId" onchange="this.form.submit()" class="form-input-bare w-full">
               <option value="">— All Events —</option>
               {{#each events}}
               <option value="{{id}}" {{#if (eq id ../filterEventId)}}selected{{/if}}>{{name}}</option>
@@ -51,64 +60,116 @@
             </select>
           </div>
           {{#if filterEventId}}
-          <a href="/inventory" class="btn-sm btn-sm-gray flex-shrink-0">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Clear Filter
+          <div class="flex items-center gap-2">
+            <!-- Summary badge when filtered -->
+            <span class="px-3 py-2 rounded-xl text-xs font-bold" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)">
+              {{items.length}} items · ₱{{totalValue}} value
+            </span>
+            <a href="/inventory" class="btn-sm btn-sm-gray flex-shrink-0">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Clear
+            </a>
+          </div>
+          {{/if}}
+          {{#if filterEventId}}
+          <a href="/inventory/export?eventId={{filterEventId}}" class="btn-sm btn-sm-green flex-shrink-0">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
           </a>
           {{/if}}
         </form>
       </div>
 
-      <!-- Items Table -->
-      <div class="section-card">
-        <div class="section-header">
-          <h2>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            {{#if selectedEvent}}{{selectedEvent.name}} — Items{{else}}All Inventory Items{{/if}}
-            <span class="ml-2 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">{{items.length}}</span>
+      <!-- Items table / empty state -->
+      <div class="rounded-2xl overflow-hidden" style="background:#111827;border:1px solid rgba(255,255,255,0.07)">
+        <!-- Header -->
+        <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.06)">
+          <h2 class="text-sm font-extrabold flex items-center gap-2" style="color:#e2e8f0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            {{#if selectedEvent}}{{selectedEvent.name}}{{else}}All Inventory Items{{/if}}
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)">{{items.length}}</span>
           </h2>
+          {{#unless filterEventId}}
+          <span class="text-xs" style="color:#374151">Select an event to filter</span>
+          {{/unless}}
         </div>
 
         {{#if items.length}}
         <div class="overflow-x-auto">
-          <table class="data-table">
+          <table class="data-table w-full">
             <thead>
               <tr>
                 <th>Item</th>
                 <th>Category</th>
                 {{#unless filterEventId}}<th>Event</th>{{/unless}}
-                <th>Qty</th>
-                <th>Condition</th>
+                <th class="text-center">Qty</th>
+                <th class="text-center">Condition</th>
+                <th class="text-center">Unit Price</th>
+                <th class="text-center">Total</th>
                 {{#if isAdmin}}<th class="text-right">Actions</th>{{/if}}
               </tr>
             </thead>
             <tbody>
               {{#each items}}
               <tr>
+                <!-- Item name + photo thumb + notes -->
                 <td>
-                  <div class="font-semibold text-slate-800">{{name}}</div>
-                  {{#if notes}}<div class="text-slate-400 text-xs mt-0.5 truncate max-w-xs">{{notes}}</div>{{/if}}
+                  <div class="flex items-center gap-3">
+                    {{#if photo}}
+                    <img src="{{photo}}" alt="{{name}}" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" style="border:1px solid rgba(255,255,255,0.08)"/>
+                    {{else}}
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    </div>
+                    {{/if}}
+                    <div>
+                      <div class="font-semibold text-sm" style="color:#e2e8f0">{{name}}</div>
+                      {{#if notes}}<div class="text-xs truncate max-w-[180px]" style="color:#374151">{{notes}}</div>{{/if}}
+                    </div>
+                  </div>
                 </td>
+                <!-- Category -->
                 <td>
-                  <span class="badge badge-gray capitalize">{{category}}</span>
+                  <span class="badge badge-gray capitalize text-[11px]">{{category}}</span>
                 </td>
                 {{#unless ../filterEventId}}
-                <td class="text-slate-500 text-xs">{{eventName}}</td>
+                <td class="text-xs" style="color:#475569">{{eventName}}</td>
                 {{/unless}}
-                <td>
-                  <span class="font-bold text-slate-800">{{quantity}}</span>
-                  <span class="text-slate-400 text-xs ml-0.5">{{unit}}</span>
-                </td>
-                <td>
-                  <span class="badge {{#if (eq condition 'good')}}badge-green{{else}}{{#if (eq condition 'damaged')}}badge-red{{else}}badge-yellow{{/if}}{{/if}} capitalize">
-                    {{condition}}
+                <!-- Qty — inline editable -->
+                <td class="text-center">
+                  <span class="inline-flex items-center gap-1 font-black text-sm" style="color:#e2e8f0">
+                    {{quantity}}
+                    <span class="text-[10px] font-normal" style="color:#374151">{{unit}}</span>
                   </span>
+                </td>
+                <!-- Condition pill -->
+                <td class="text-center">
+                  {{#if (eq condition 'good')}}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold" style="background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25)">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Good
+                  </span>
+                  {{else}}{{#if (eq condition 'fair')}}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold" style="background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.25)">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Fair
+                  </span>
+                  {{else}}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold" style="background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.25)">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Damaged
+                  </span>
+                  {{/if}}{{/if}}
+                </td>
+                <!-- Unit price -->
+                <td class="text-center text-sm" style="color:#94a3b8">
+                  {{#if unitPrice}}₱{{unitPrice}}{{else}}<span style="color:#1f2937">—</span>{{/if}}
+                </td>
+                <!-- Total value -->
+                <td class="text-center font-bold text-sm" style="color:#a5b4fc">
+                  {{#if unitPrice}}₱{{totalValue}}{{else}}<span style="color:#1f2937">—</span>{{/if}}
                 </td>
                 {{#if ../isAdmin}}
                 <td class="text-right">
-                  <!-- Inline edit form (modal-free, inline row) -->
                   <button type="button"
-                    onclick="openEditModal('{{id}}','{{name}}','{{category}}','{{quantity}}','{{unit}}','{{condition}}','{{notes}}','{{eventId}}')"
+                    onclick="openEditModal('{{id}}','{{name}}','{{category}}','{{quantity}}','{{unit}}','{{condition}}','{{notes}}','{{eventId}}','{{unitPrice}}','{{photo}}')"
                     class="btn-sm btn-sm-gray text-xs px-2.5 py-1.5 mr-1">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
@@ -123,82 +184,180 @@
               </tr>
               {{/each}}
             </tbody>
+            <!-- Footer total row -->
+            <tfoot>
+              <tr style="border-top:2px solid rgba(99,102,241,0.2)">
+                <td colspan="{{#if filterEventId}}4{{else}}5{{/if}}" class="px-5 py-3 text-xs font-extrabold uppercase tracking-widest text-right" style="color:#4b5563">Total Estimated Value</td>
+                <td class="px-5 py-3 text-center"></td>
+                <td class="px-5 py-3 text-center font-black text-sm" style="color:#a5b4fc">₱{{totalValue}}</td>
+                {{#if isAdmin}}<td></td>{{/if}}
+              </tr>
+            </tfoot>
           </table>
         </div>
+
         {{else}}
-        <div class="py-14 text-center text-slate-400 text-sm">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" class="mx-auto mb-3">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
-          {{#if filterEventId}}No inventory items for this event yet.{{else}}No inventory items found. Add one using the form.{{/if}}
+        <!-- Empty state -->
+        <div class="py-16 text-center">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(99,102,241,0.10);border:1px solid rgba(99,102,241,0.15)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.5">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          {{#if filterEventId}}
+          <p class="font-bold text-sm mb-1" style="color:#e2e8f0">No items for this event yet</p>
+          <p class="text-xs mb-5" style="color:#374151">Add the first item using the form on the right.</p>
+          {{else}}
+          <p class="font-bold text-sm mb-1" style="color:#e2e8f0">No inventory items yet</p>
+          <p class="text-xs mb-5" style="color:#374151">Select an event above, then add items using the form.</p>
+          {{/if}}
+          {{#if isAdmin}}
+          <button onclick="document.querySelector('[name=name]').focus()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition"
+            style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Your First Item
+          </button>
+          {{/if}}
         </div>
         {{/if}}
       </div>
     </div>
 
-    <!-- RIGHT: Add Item Form -->
+    <!-- ── RIGHT: Add Item Form ── -->
     {{#if isAdmin}}
-    <div class="space-y-4">
-      <div class="card-flat">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style="background:linear-gradient(135deg,#92400e,#f59e0b)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <div>
+      <div class="rounded-2xl overflow-hidden sticky top-4" style="background:#111827;border:1px solid rgba(255,255,255,0.07)">
+
+        <!-- Form header -->
+        <div class="px-5 py-4 flex items-center gap-3" style="border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(99,102,241,0.07)">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.35)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </div>
-          <h2 class="font-bold text-slate-800">Add Item</h2>
+          <h2 class="font-extrabold text-sm" style="color:#e2e8f0">Add Item</h2>
         </div>
-        <form method="POST" action="/inventory" class="px-6 py-5 space-y-4">
+
+        <form method="POST" action="/inventory" class="px-5 py-5 space-y-4">
+
+          <!-- Event -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Event <span class="text-red-500">*</span></label>
-            <select name="eventId" required class="form-input-bare bg-white">
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Event <span style="color:#ef4444">*</span></label>
+            <select name="eventId" required class="form-input-bare w-full">
               <option value="">Select an event…</option>
               {{#each events}}
               <option value="{{id}}" {{#if (eq id ../filterEventId)}}selected{{/if}}>{{name}}</option>
               {{/each}}
             </select>
           </div>
+
+          <!-- Item name -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Item Name <span class="text-red-500">*</span></label>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Item Name <span style="color:#ef4444">*</span></label>
             <input type="text" name="name" placeholder="e.g. Crown, Sash, Sound System" required class="form-input-bare"/>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Category</label>
-              <select name="category" class="form-input-bare bg-white">
-                <option value="general">General</option>
-                <option value="props">Props</option>
-                <option value="equipment">Equipment</option>
-                <option value="costume">Costume</option>
-                <option value="awards">Awards</option>
-                <option value="supplies">Supplies</option>
-                <option value="decor">Decor</option>
-                <option value="av">Audio/Visual</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Condition</label>
-              <select name="condition" class="form-input-bare bg-white">
-                <option value="good">Good</option>
-                <option value="fair">Fair</option>
-                <option value="damaged">Damaged</option>
-              </select>
+
+          <!-- Category -->
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Category</label>
+            <div class="flex flex-wrap gap-1.5" id="cat-pills">
+              <input type="hidden" name="category" id="cat-value" value="general"/>
+              <button type="button" onclick="setCategory(this,'general')"    data-val="general"    class="cat-pill active">General</button>
+              <button type="button" onclick="setCategory(this,'props')"      data-val="props"      class="cat-pill">Props</button>
+              <button type="button" onclick="setCategory(this,'equipment')"  data-val="equipment"  class="cat-pill">Equipment</button>
+              <button type="button" onclick="setCategory(this,'costume')"    data-val="costume"    class="cat-pill">Costume</button>
+              <button type="button" onclick="setCategory(this,'awards')"     data-val="awards"     class="cat-pill">Awards</button>
+              <button type="button" onclick="setCategory(this,'supplies')"   data-val="supplies"   class="cat-pill">Supplies</button>
+              <button type="button" onclick="setCategory(this,'decor')"      data-val="decor"      class="cat-pill">Decor</button>
+              <button type="button" onclick="setCategory(this,'av')"         data-val="av"         class="cat-pill">Audio/Visual</button>
+              <button type="button" onclick="setCategory(this,'other')"      data-val="other"      class="cat-pill">Other</button>
             </div>
           </div>
+
+          <!-- Condition toggles -->
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Condition</label>
+            <input type="hidden" name="condition" id="cond-value" value="good"/>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="setCondition(this,'good')"
+                class="cond-pill active py-2 rounded-xl text-xs font-extrabold transition"
+                style="background:rgba(16,185,129,0.2);color:#6ee7b7;border:2px solid rgba(16,185,129,0.4)">
+                ✅ Good
+              </button>
+              <button type="button" onclick="setCondition(this,'fair')"
+                class="cond-pill py-2 rounded-xl text-xs font-extrabold transition"
+                style="background:rgba(255,255,255,0.05);color:#64748b;border:2px solid rgba(255,255,255,0.08)">
+                ⚠️ Fair
+              </button>
+              <button type="button" onclick="setCondition(this,'damaged')"
+                class="cond-pill py-2 rounded-xl text-xs font-extrabold transition"
+                style="background:rgba(255,255,255,0.05);color:#64748b;border:2px solid rgba(255,255,255,0.08)">
+                ❌ Damaged
+              </button>
+            </div>
+          </div>
+
+          <!-- Quantity + unit -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Quantity</label>
+              <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Quantity</label>
               <input type="number" name="quantity" value="1" min="1" class="form-input-bare"/>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Unit</label>
-              <input type="text" name="unit" placeholder="pcs" class="form-input-bare"/>
+              <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit</label>
+              <div class="relative">
+                <input type="text" name="unit" id="unit-input" placeholder="pcs" class="form-input-bare pr-8"/>
+                <!-- Quick-select unit dropdown -->
+                <button type="button" onclick="toggleUnitPicker()" class="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-300 transition">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div id="unit-picker" class="hidden absolute right-0 top-full mt-1 z-20 rounded-xl p-2 shadow-2xl grid grid-cols-3 gap-1" style="background:#1e293b;border:1px solid rgba(255,255,255,0.10);min-width:180px">
+                  <button type="button" onclick="pickUnit('pcs')"   class="unit-opt">pcs</button>
+                  <button type="button" onclick="pickUnit('sets')"  class="unit-opt">sets</button>
+                  <button type="button" onclick="pickUnit('boxes')" class="unit-opt">boxes</button>
+                  <button type="button" onclick="pickUnit('rolls')" class="unit-opt">rolls</button>
+                  <button type="button" onclick="pickUnit('bags')"  class="unit-opt">bags</button>
+                  <button type="button" onclick="pickUnit('pairs')" class="unit-opt">pairs</button>
+                  <button type="button" onclick="pickUnit('units')" class="unit-opt">units</button>
+                  <button type="button" onclick="pickUnit('kg')"    class="unit-opt">kg</button>
+                  <button type="button" onclick="pickUnit('m')"     class="unit-opt">m</button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Unit price -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Notes</label>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit Price (₱) <span style="color:#374151;font-weight:400;text-transform:none;letter-spacing:0">optional</span></label>
+            <input type="number" name="unitPrice" placeholder="0.00" min="0" step="0.01" class="form-input-bare"/>
+          </div>
+
+          <!-- Photo -->
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Photo <span style="color:#374151;font-weight:400;text-transform:none;letter-spacing:0">optional</span></label>
+            <div id="inv-photo-dropzone" onclick="document.getElementById('inv-photo-file').click()"
+              class="flex flex-col items-center justify-center py-4 rounded-xl cursor-pointer transition"
+              style="border:2px dashed rgba(99,102,241,0.25);background:rgba(99,102,241,0.05)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" class="mb-1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="text-xs font-semibold" style="color:#6366f1">Upload photo</span>
+              <span class="text-[10px] mt-0.5" style="color:#374151">PNG/JPG · max 2MB</span>
+            </div>
+            <input type="file" id="inv-photo-file" accept="image/*" class="hidden" onchange="handleInvPhoto(this)"/>
+            <input type="hidden" name="photo" id="inv-photo-b64"/>
+            <div id="inv-photo-preview" class="hidden mt-2 flex items-center gap-2">
+              <img id="inv-photo-img" src="" alt="" class="w-12 h-12 rounded-lg object-cover" style="border:1px solid rgba(255,255,255,0.08)"/>
+              <button type="button" onclick="clearInvPhoto()" class="btn-sm btn-sm-red text-xs">Remove</button>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Notes</label>
             <textarea name="notes" rows="2" placeholder="Optional notes…" class="form-input-bare resize-none"></textarea>
           </div>
-          <button type="submit" class="btn-primary w-full py-2.5 text-sm justify-center">
+
+          <button type="submit" class="btn-primary w-full py-3 text-sm justify-center">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add to Inventory
           </button>
@@ -207,62 +366,77 @@
     </div>
     {{/if}}
 
-  </div><!-- /grid -->
+  </div>
 
 </main>
 </div>
 
-<!-- Edit Modal -->
-<div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.45)">
-  <div class="card-flat w-full max-w-md mx-4 shadow-2xl">
-    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-      <h3 class="font-bold text-slate-800">Edit Inventory Item</h3>
-      <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 transition">
+<!-- ── Edit Modal ── -->
+<div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden" style="background:rgba(0,0,0,0.7)">
+  <div class="w-full max-w-md mx-4 rounded-2xl overflow-hidden shadow-2xl" style="background:#111827;border:1px solid rgba(255,255,255,0.10)">
+    <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.07)">
+      <h3 class="font-extrabold text-sm" style="color:#e2e8f0">Edit Inventory Item</h3>
+      <button type="button" onclick="closeEditModal()" style="color:#475569" class="hover:text-white transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <form id="edit-form" method="POST" action="" class="px-6 py-5 space-y-4">
-      <input type="hidden" name="eventId" id="edit-eventId"/>
+      <input type="hidden" name="eventId"   id="edit-eventId"/>
+      <input type="hidden" name="photo"     id="edit-photo-b64"/>
       <div>
-        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Item Name <span class="text-red-500">*</span></label>
+        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Item Name <span style="color:#ef4444">*</span></label>
         <input type="text" name="name" id="edit-name" required class="form-input-bare"/>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Category</label>
-          <select name="category" id="edit-category" class="form-input-bare bg-white">
-            <option value="general">General</option>
-            <option value="props">Props</option>
-            <option value="equipment">Equipment</option>
-            <option value="costume">Costume</option>
-            <option value="awards">Awards</option>
-            <option value="supplies">Supplies</option>
-            <option value="decor">Decor</option>
-            <option value="av">Audio/Visual</option>
+          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Category</label>
+          <select name="category" id="edit-category" class="form-input-bare">
+            <option value="general">General</option><option value="props">Props</option>
+            <option value="equipment">Equipment</option><option value="costume">Costume</option>
+            <option value="awards">Awards</option><option value="supplies">Supplies</option>
+            <option value="decor">Decor</option><option value="av">Audio/Visual</option>
             <option value="other">Other</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Condition</label>
-          <select name="condition" id="edit-condition" class="form-input-bare bg-white">
-            <option value="good">Good</option>
-            <option value="fair">Fair</option>
-            <option value="damaged">Damaged</option>
+          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Condition</label>
+          <select name="condition" id="edit-condition" class="form-input-bare">
+            <option value="good">✅ Good</option><option value="fair">⚠️ Fair</option><option value="damaged">❌ Damaged</option>
           </select>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-3 gap-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Quantity</label>
+          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Qty</label>
           <input type="number" name="quantity" id="edit-quantity" min="1" class="form-input-bare"/>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Unit</label>
+          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit</label>
           <input type="text" name="unit" id="edit-unit" class="form-input-bare"/>
         </div>
+        <div>
+          <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Unit ₱</label>
+          <input type="number" name="unitPrice" id="edit-unitPrice" min="0" step="0.01" placeholder="0" class="form-input-bare"/>
+        </div>
+      </div>
+      <!-- Photo edit -->
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Photo</label>
+        <div id="edit-photo-existing" class="hidden mb-2">
+          <img id="edit-photo-img" src="" alt="" class="w-14 h-14 rounded-lg object-cover" style="border:1px solid rgba(255,255,255,0.08)"/>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="document.getElementById('edit-photo-file').click()"
+            class="btn-sm btn-sm-gray text-xs flex-1 justify-center">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Replace Photo
+          </button>
+          <button type="button" onclick="clearEditPhoto()" class="btn-sm btn-sm-red text-xs">Remove</button>
+        </div>
+        <input type="file" id="edit-photo-file" accept="image/*" class="hidden" onchange="handleEditPhoto(this)"/>
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Notes</label>
+        <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style="color:#4b5563">Notes</label>
         <textarea name="notes" id="edit-notes" rows="2" class="form-input-bare resize-none"></textarea>
       </div>
       <div class="flex gap-2 pt-1">
@@ -273,26 +447,119 @@
   </div>
 </div>
 
+<style>
+  .cat-pill {
+    padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    background: rgba(255,255,255,0.05); color: #64748b;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .cat-pill.active, .cat-pill:hover {
+    background: rgba(99,102,241,0.2); color: #a5b4fc;
+    border-color: rgba(99,102,241,0.4);
+  }
+  .unit-opt {
+    padding: 5px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; transition: all 0.12s; text-align: center;
+    background: transparent; color: #94a3b8; border: 1px solid transparent;
+  }
+  .unit-opt:hover { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+</style>
+
 <script>
-function openEditModal(id, name, category, qty, unit, condition, notes, eventId) {
-  document.getElementById('edit-form').action = '/inventory/' + id + '/update';
-  document.getElementById('edit-name').value      = name;
-  document.getElementById('edit-quantity').value  = qty;
-  document.getElementById('edit-unit').value      = unit;
-  document.getElementById('edit-notes').value     = notes;
-  document.getElementById('edit-eventId').value   = eventId;
+/* ── Category pills ── */
+function setCategory(btn, val) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cat-value').value = val;
+}
+
+/* ── Condition toggles ── */
+function setCondition(btn, val) {
+  document.querySelectorAll('.cond-pill').forEach(p => {
+    p.style.background = 'rgba(255,255,255,0.05)';
+    p.style.color = '#64748b';
+    p.style.borderColor = 'rgba(255,255,255,0.08)';
+  });
+  document.getElementById('cond-value').value = val;
+  if (val === 'good')    { btn.style.background='rgba(16,185,129,0.2)'; btn.style.color='#6ee7b7'; btn.style.borderColor='rgba(16,185,129,0.4)'; }
+  if (val === 'fair')    { btn.style.background='rgba(245,158,11,0.2)'; btn.style.color='#fcd34d'; btn.style.borderColor='rgba(245,158,11,0.4)'; }
+  if (val === 'damaged') { btn.style.background='rgba(239,68,68,0.2)';  btn.style.color='#fca5a5'; btn.style.borderColor='rgba(239,68,68,0.4)'; }
+}
+
+/* ── Unit quick-pick ── */
+function toggleUnitPicker() {
+  const p = document.getElementById('unit-picker');
+  p.classList.toggle('hidden');
+}
+function pickUnit(u) {
+  document.getElementById('unit-input').value = u;
+  document.getElementById('unit-picker').classList.add('hidden');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#unit-picker') && !e.target.closest('[onclick="toggleUnitPicker()"]')) {
+    document.getElementById('unit-picker')?.classList.add('hidden');
+  }
+});
+
+/* ── Add photo ── */
+function handleInvPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 2*1024*1024) { alert('Max 2MB'); input.value=''; return; }
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('inv-photo-b64').value = e.target.result;
+    document.getElementById('inv-photo-img').src   = e.target.result;
+    document.getElementById('inv-photo-preview').classList.remove('hidden');
+    document.getElementById('inv-photo-dropzone').classList.add('hidden');
+  };
+  r.readAsDataURL(file);
+}
+function clearInvPhoto() {
+  document.getElementById('inv-photo-b64').value = '';
+  document.getElementById('inv-photo-preview').classList.add('hidden');
+  document.getElementById('inv-photo-dropzone').classList.remove('hidden');
+  document.getElementById('inv-photo-file').value = '';
+}
+
+/* ── Edit modal ── */
+function openEditModal(id, name, category, qty, unit, condition, notes, eventId, unitPrice, photo) {
+  document.getElementById('edit-form').action       = '/inventory/' + id + '/update';
+  document.getElementById('edit-name').value        = name;
+  document.getElementById('edit-quantity').value    = qty;
+  document.getElementById('edit-unit').value        = unit;
+  document.getElementById('edit-notes').value       = notes;
+  document.getElementById('edit-eventId').value     = eventId;
+  document.getElementById('edit-unitPrice').value   = unitPrice || '';
+  document.getElementById('edit-photo-b64').value   = photo || '';
   const catSel = document.getElementById('edit-category');
   for (let o of catSel.options) o.selected = (o.value === category);
   const conSel = document.getElementById('edit-condition');
   for (let o of conSel.options) o.selected = (o.value === condition);
+  const imgEl = document.getElementById('edit-photo-img');
+  const imgWrap = document.getElementById('edit-photo-existing');
+  if (photo) { imgEl.src = photo; imgWrap.classList.remove('hidden'); }
+  else        { imgWrap.classList.add('hidden'); }
   document.getElementById('edit-modal').classList.remove('hidden');
 }
-function closeEditModal() {
-  document.getElementById('edit-modal').classList.add('hidden');
+function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+document.getElementById('edit-modal').addEventListener('click', function(e) { if (e.target===this) closeEditModal(); });
+function handleEditPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 2*1024*1024) { alert('Max 2MB'); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('edit-photo-b64').value = e.target.result;
+    const img = document.getElementById('edit-photo-img');
+    img.src = e.target.result;
+    document.getElementById('edit-photo-existing').classList.remove('hidden');
+  };
+  r.readAsDataURL(file);
 }
-document.getElementById('edit-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeEditModal();
-});
+function clearEditPhoto() {
+  document.getElementById('edit-photo-b64').value = '';
+  document.getElementById('edit-photo-existing').classList.add('hidden');
+}
 </script>
 
 {{> footer }}

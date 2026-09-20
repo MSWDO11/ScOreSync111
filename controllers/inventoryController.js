@@ -42,12 +42,17 @@ export const listInventory = async (req, res) => {
       return tB - tA;
     });
 
-    // Attach event name to each item
+    // Attach event name + compute totals
     const eventMap = Object.fromEntries(events.map(e => [e.id, e.name]));
     items = items.map(item => ({
       ...item,
-      eventName: eventMap[item.eventId] || "—",
+      eventName:  eventMap[item.eventId] || "—",
+      totalValue: ((Number(item.unitPrice) || 0) * (Number(item.quantity) || 1)).toFixed(2),
     }));
+
+    // Summary totals for the filtered set
+    const totalValue = items.reduce((sum, i) => sum + (Number(i.unitPrice)||0) * (Number(i.quantity)||1), 0);
+    const totalItems = items.reduce((sum, i) => sum + (Number(i.quantity)||1), 0);
 
     // Find selected event
     const selectedEvent = eventId ? events.find(e => e.id === eventId) : null;
@@ -58,6 +63,8 @@ export const listInventory = async (req, res) => {
       events,
       selectedEvent: selectedEvent || null,
       filterEventId: eventId || "",
+      totalValue:    totalValue.toFixed(2),
+      totalItems,
       userName:      req.session.userName,
       userRole:      req.session.userRole,
       userInitial:   (req.session.userName || "U")[0].toUpperCase(),
@@ -74,20 +81,22 @@ export const listInventory = async (req, res) => {
 
 // ─── Add inventory item ───────────────────────────────────────────────────────
 export const storeInventoryItem = async (req, res) => {
-  const { eventId, name, category, quantity, unit, condition, notes } = req.body;
+  const { eventId, name, category, quantity, unit, condition, notes, unitPrice, photo } = req.body;
   try {
     if (!eventId || !name) {
       req.flash("error_msg", "Event and item name are required.");
       return res.redirect("/inventory");
     }
     await addDoc(collection(db, INVENTORY), {
-      eventId:   eventId,
+      eventId,
       name:      name.trim(),
-      category:  category  || "general",
-      quantity:  Number(quantity) || 1,
-      unit:      unit      || "pcs",
-      condition: condition || "good",
-      notes:     notes     || "",
+      category:  category   || "general",
+      quantity:  Number(quantity)  || 1,
+      unit:      unit       || "pcs",
+      condition: condition  || "good",
+      notes:     notes      || "",
+      unitPrice: Number(unitPrice) || 0,
+      photo:     photo      || "",
       createdBy: req.session.userId,
       createdAt: serverTimestamp(),
     });
@@ -102,15 +111,17 @@ export const storeInventoryItem = async (req, res) => {
 
 // ─── Update inventory item ────────────────────────────────────────────────────
 export const updateInventoryItem = async (req, res) => {
-  const { name, category, quantity, unit, condition, notes, eventId } = req.body;
+  const { name, category, quantity, unit, condition, notes, eventId, unitPrice, photo } = req.body;
   try {
     await updateDoc(doc(db, INVENTORY, req.params.id), {
       name:      name.trim(),
       category:  category  || "general",
-      quantity:  Number(quantity) || 1,
+      quantity:  Number(quantity)  || 1,
       unit:      unit      || "pcs",
       condition: condition || "good",
       notes:     notes     || "",
+      unitPrice: Number(unitPrice) || 0,
+      photo:     photo     || "",
     });
     req.flash("success_msg", `Item "${name}" updated.`);
     res.redirect(`/inventory?eventId=${eventId}`);
@@ -121,7 +132,38 @@ export const updateInventoryItem = async (req, res) => {
   }
 };
 
-// ─── Delete inventory item ────────────────────────────────────────────────────
+// ─── Export inventory as CSV ──────────────────────────────────────────────────
+export const exportInventoryCSV = async (req, res) => {
+  const { eventId } = req.query;
+  try {
+    const allSnap = await getDocs(collection(db, INVENTORY));
+    let items = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (eventId) items = items.filter(i => i.eventId === eventId);
+
+    const events = await getEvents();
+    const eventMap = Object.fromEntries(events.map(e => [e.id, e.name]));
+
+    const rows = [
+      ['Item Name','Category','Condition','Quantity','Unit','Unit Price (₱)','Total Value (₱)','Event','Notes'],
+      ...items.map(i => [
+        i.name, i.category, i.condition, i.quantity, i.unit || 'pcs',
+        i.unitPrice || 0,
+        ((Number(i.unitPrice)||0) * (Number(i.quantity)||1)).toFixed(2),
+        eventMap[i.eventId] || '—',
+        (i.notes || '').replace(/,/g,' '),
+      ]),
+    ];
+
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const filename = `inventory${eventId ? '-' + eventId.slice(0,8) : ''}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Export failed');
+  }
+};
 export const deleteInventoryItem = async (req, res) => {
   const { eventId } = req.body;
   try {

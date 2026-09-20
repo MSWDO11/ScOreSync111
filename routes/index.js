@@ -110,10 +110,11 @@ router.post("/analytics/flags/:flagId/status",requireAuth, requireRole("admin"),
 
 // ─── Inventory (admin only for mutations, all auth for reads) ──────────────────
 import {
-  listInventory, storeInventoryItem, updateInventoryItem, deleteInventoryItem,
+  listInventory, storeInventoryItem, updateInventoryItem, deleteInventoryItem, exportInventoryCSV,
 } from "../controllers/inventoryController.js";
 
 router.get( "/inventory",              requireAuth, requireRole("admin"),           listInventory);
+router.get( "/inventory/export",       requireAuth, requireRole("admin"),           exportInventoryCSV);
 router.post("/inventory",              requireAuth, requireRole("admin"),           storeInventoryItem);
 router.post("/inventory/:id/update",   requireAuth, requireRole("admin"),           updateInventoryItem);
 router.post("/inventory/:id/delete",   requireAuth, requireRole("admin"),           deleteInventoryItem);
