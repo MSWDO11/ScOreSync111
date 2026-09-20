@@ -3,6 +3,7 @@ import {
   collection, addDoc, getDocs, getDoc, doc,
   updateDoc, deleteDoc, serverTimestamp,
 } from "firebase/firestore";
+import { autoCreateRegistrationRecord, autoDeleteRegistrationRecord } from "./inventoryController.js";
 
 // Contestants are sub-collections under events: events/{eventId}/contestants
 
@@ -27,20 +28,25 @@ export const addContestantPage = async (req, res) => {
 
 // ─── Store contestant ─────────────────────────────────────────────────────────
 export const storeContestant = async (req, res) => {
-  const { name, number, barangay, age, gender, description, photo, platform } = req.body;
+  const { name, number, barangay, age, gender, description, photo, platform, registrationFee } = req.body;
   const { eventId } = req.params;
   try {
-    await addDoc(collection(db, "events", eventId, "contestants"), {
+    const docRef = await addDoc(collection(db, "events", eventId, "contestants"), {
       name,
-      number:      number      || "",
-      barangay:    barangay    || "",
-      age:         age         || "",
-      gender:      gender      || "",
-      description: description || "",
-      platform:    platform    || "",
-      photo:       photo       || "",
-      createdAt:   serverTimestamp(),
+      number:          number          || "",
+      barangay:        barangay        || "",
+      age:             age             || "",
+      gender:          gender          || "",
+      description:     description     || "",
+      platform:        platform        || "",
+      photo:           photo           || "",
+      registrationFee: Number(registrationFee) || 0,
+      createdAt:       serverTimestamp(),
     });
+
+    // Auto-create a ticket/income record for the registration fee
+    await autoCreateRegistrationRecord(eventId, name, docRef.id, registrationFee, req.session.userId);
+
     req.flash("success_msg", `Contestant "${name}" added.`);
     res.redirect(`/events/${eventId}`);
   } catch (err) {
@@ -102,6 +108,8 @@ export const deleteContestant = async (req, res) => {
   const { eventId, id } = req.params;
   try {
     await deleteDoc(doc(db, "events", eventId, "contestants", id));
+    // Auto-delete the linked registration fee ticket record
+    await autoDeleteRegistrationRecord(eventId, id);
     req.flash("success_msg", "Contestant removed.");
   } catch (err) {
     req.flash("error_msg", "Failed to remove contestant.");

@@ -177,3 +177,39 @@ export const deleteInventoryItem = async (req, res) => {
     res.redirect("/inventory");
   }
 };
+
+// ─── Auto-create a registration fee record when a contestant is added ─────────
+export async function autoCreateRegistrationRecord(eventId, contestantName, contestantId, registrationFee, createdBy) {
+  if (!registrationFee || Number(registrationFee) <= 0) return; // skip if no fee
+  try {
+    await addDoc(collection(db, INVENTORY), {
+      eventId,
+      contestantId,                          // link back so we can delete it
+      ticketType:  "Registration Fee",
+      quantity:    1,
+      unitPrice:   parseFloat(Number(registrationFee).toFixed(2)),
+      total:       parseFloat(Number(registrationFee).toFixed(2)),
+      notes:       `Auto-recorded — ${contestantName}`,
+      photo:       "",
+      auto:        true,                     // flag as auto-generated
+      createdBy,
+      createdAt:   serverTimestamp(),
+    });
+  } catch (err) {
+    console.error("Auto-record creation failed:", err);
+  }
+}
+
+// ─── Auto-delete linked ticket record when contestant is removed ──────────────
+export async function autoDeleteRegistrationRecord(eventId, contestantId) {
+  try {
+    const allSnap = await getDocs(collection(db, INVENTORY));
+    const linked  = allSnap.docs.filter(d => {
+      const data = d.data();
+      return data.eventId === eventId && data.contestantId === contestantId && data.auto === true;
+    });
+    await Promise.all(linked.map(d => deleteDoc(doc(db, INVENTORY, d.id))));
+  } catch (err) {
+    console.error("Auto-record deletion failed:", err);
+  }
+}
