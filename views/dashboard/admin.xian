@@ -174,10 +174,6 @@
 
   </div>
 
-  <!-- Stage & Round Countdown Timer Widget -->
-  <div class="animate-fadeup-2">
-    {{> countdown_timer }}
-  </div>
 
   <!-- Main Grid: Recent Events & System Quick Stats -->
   <div class="grid lg:grid-cols-3 gap-6 animate-fadeup-2">
