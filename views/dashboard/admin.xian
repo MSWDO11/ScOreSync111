@@ -97,7 +97,7 @@
         <div class="h-full rounded-full" style="width:85%;background:rgba(255,255,255,0.8)"></div>
       </div>
       <a href="/users" class="inline-flex items-center gap-1.5 text-xs font-bold relative z-10" style="color:rgba(110,231,183,0.9)">
-        Judges, encoders &amp; admins
+        Judges, participants &amp; admins
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>

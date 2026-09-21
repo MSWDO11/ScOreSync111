@@ -1,106 +1,197 @@
 {{> head }}
-<body class="min-h-screen flex" style="background:#f0f4ff">
-  <!-- Left panel -->
-  <div class="hidden lg:flex lg:w-[44%] auth-panel-bg flex-col justify-between p-10 relative">
+<body class="min-h-screen flex" style="background:#0a0f1e">
+
+  <!-- ══ Left Panel ══ -->
+  <div class="hidden lg:flex lg:w-[46%] flex-col justify-between p-10 relative overflow-hidden"
+    style="background:linear-gradient(160deg,#060d1f 0%,#0f2156 45%,#1a4db5 78%,#2563eb 100%)">
+
+    <!-- Decorative circles -->
+    <div class="absolute top-0 left-0 w-96 h-96 rounded-full -translate-x-1/2 -translate-y-1/2" style="background:rgba(255,255,255,0.04)"></div>
+    <div class="absolute bottom-0 right-0 w-80 h-80 rounded-full translate-x-1/3 translate-y-1/3" style="background:rgba(255,255,255,0.04)"></div>
+    <div class="absolute top-1/2 left-1/2 w-64 h-64 rounded-full -translate-x-1/2 -translate-y-1/2" style="background:rgba(255,255,255,0.02)"></div>
+
+    <!-- Top: Logo row -->
     <div class="relative z-10">
-      <div class="flex items-center gap-3 mb-14">
-        <div class="w-10 h-10 grad-gold rounded-2xl flex items-center justify-center shadow-xl">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+      <div class="flex items-center gap-4 mb-12">
+        <!-- Mansalay Seal -->
+        <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-2xl" style="border:3px solid rgba(255,255,255,0.25)">
+          <img src="/mansalay-logo.png" alt="Mansalay Seal" class="w-full h-full object-cover"/>
         </div>
-        <span class="text-white font-black text-xl tracking-tight">ScoreSync</span>
+        <!-- ScoreSync wordmark -->
+        <div>
+          <div class="text-white font-black text-xl tracking-tight leading-none">ScoreSync</div>
+          <div class="text-blue-300 text-xs font-medium mt-0.5" style="opacity:0.75">Mansalay, Oriental Mindoro</div>
+        </div>
       </div>
-      <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-blue-200 mb-6" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15)">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 14 8 14s8-8.6 8-14a8 8 0 0 0-8-8z"/></svg>
+
+      <!-- Location pill -->
+      <div class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold mb-8"
+        style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);color:#bfdbfe">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 14 8 14s8-8.6 8-14a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>
         Mansalay, Oriental Mindoro
       </div>
-      <h2 class="text-white text-3xl font-black leading-tight tracking-tight mb-4">Automate your<br/>competition scoring.</h2>
-      <p class="text-blue-200 text-sm leading-relaxed max-w-xs">Real-time tabulation, role-based access, and instant official results — built for Mansalay's municipal events.</p>
+
+      <!-- Hero text -->
+      <h2 class="text-white font-black leading-tight tracking-tight mb-4" style="font-size:2rem">
+        Automate your<br/>competition scoring.
+      </h2>
+      <p class="text-sm leading-relaxed max-w-xs" style="color:rgba(147,197,253,0.85)">
+        Real-time tabulation, role-based access, and instant official results — built for Mansalay's municipal events.
+      </p>
     </div>
+
+    <!-- Bottom: Feature cards -->
     <div class="relative z-10 space-y-3">
-      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5" style="background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.12)">
-        <div class="w-9 h-9 grad-gold rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5 transition"
+        style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12)">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md grad-gold">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="white" stroke="none"/></svg>
         </div>
-        <div><div class="text-white text-sm font-bold">Real-time Scoring</div><div class="text-blue-300 text-xs mt-0.5">Live updates as judges submit</div></div>
+        <div>
+          <div class="text-white text-sm font-bold">Real-time Scoring</div>
+          <div class="text-xs mt-0.5" style="color:rgba(147,197,253,0.75)">Live updates as judges submit</div>
+        </div>
       </div>
-      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5" style="background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.12)">
-        <div class="w-9 h-9 grad-green rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+        style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12)">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md grad-green">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <div><div class="text-white text-sm font-bold">Role-Based Access</div><div class="text-blue-300 text-xs mt-0.5">Admin, Judge &amp; Encoder portals</div></div>
+        <div>
+          <div class="text-white text-sm font-bold">Role-Based Access</div>
+          <div class="text-xs mt-0.5" style="color:rgba(147,197,253,0.75)">Admin, Judge &amp; Participant portals</div>
+        </div>
       </div>
-      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5" style="background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.12)">
-        <div class="w-9 h-9 grad-purple rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+      <div class="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+        style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12)">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md grad-purple">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
         </div>
-        <div><div class="text-white text-sm font-bold">Instant Results</div><div class="text-blue-300 text-xs mt-0.5">Weighted leaderboard &amp; podium</div></div>
+        <div>
+          <div class="text-white text-sm font-bold">Instant Results</div>
+          <div class="text-xs mt-0.5" style="color:rgba(147,197,253,0.75)">Weighted leaderboard &amp; podium</div>
+        </div>
       </div>
-      <p class="text-blue-300 text-xs pt-2" style="opacity:0.6">&copy; 2026 ScoreSync &mdash; Mansalay, Oriental Mindoro</p>
+      <p class="text-xs pt-3" style="color:rgba(147,197,253,0.4)">&copy; 2026 ScoreSync — Mansalay, Oriental Mindoro</p>
     </div>
   </div>
-  <!-- Right panel -->
-  <div class="flex-1 flex items-center justify-center px-6 py-10">
+
+  <!-- ══ Right Panel ══ -->
+  <div class="flex-1 flex items-center justify-center px-5 py-10" style="background:#0a0f1e">
     <div class="w-full max-w-[420px] animate-fadeup">
-      <div class="flex items-center gap-2.5 justify-center mb-8 lg:hidden">
-        <div class="w-10 h-10 grad-gold rounded-2xl flex items-center justify-center shadow-lg">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+
+      <!-- Mobile logo -->
+      <div class="flex items-center gap-3 justify-center mb-8 lg:hidden">
+        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 shadow-xl" style="border:2px solid rgba(255,255,255,0.2)">
+          <img src="/mansalay-logo.png" alt="Mansalay Seal" class="w-full h-full object-cover"/>
         </div>
-        <span class="font-black text-xl text-slate-800">ScoreSync</span>
+        <div>
+          <div class="font-black text-xl text-white tracking-tight">ScoreSync</div>
+          <div class="text-xs" style="color:#475569">Mansalay, Or. Mindoro</div>
+        </div>
       </div>
-      <div class="bg-white rounded-2xl p-8" style="box-shadow:0 4px 32px rgba(0,0,0,0.10),0 1px 4px rgba(0,0,0,0.06)">
-        <div class="mb-7">
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Welcome back</h1>
-          <p class="text-slate-500 text-sm mt-1">Sign in to your ScoreSync account.</p>
-        </div>
-        {{#if error_msg}}<div class="alert-error mb-5"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>{{error_msg}}</span></div>{{/if}}
-        {{#if success_msg}}<div class="alert-success mb-5"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg><span>{{success_msg}}</span></div>{{/if}}
-        <form method="POST" action="/login" class="space-y-5">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address</label>
-            <div class="relative">
-              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              </span>
-              <input type="email" name="email" placeholder="you@example.com" required autocomplete="email"
-                style="width:100%;padding:11px 14px 11px 40px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.875rem;color:#0f172a;outline:none;background:#fff;"
-                onfocus="this.style.borderColor='#3b82f6';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.12)'"
-                onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'"/>
+
+      <!-- Login card -->
+      <div class="rounded-2xl overflow-hidden shadow-2xl" style="background:#111827;border:1px solid rgba(255,255,255,0.10)">
+
+        <!-- Card header accent -->
+        <div class="h-1.5" style="background:linear-gradient(90deg,#1d4ed8,#6366f1,#8b5cf6)"></div>
+
+        <div class="p-7 sm:p-8">
+          <!-- Heading with seal -->
+          <div class="flex items-center gap-3 mb-7">
+            <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style="border:2px solid rgba(255,255,255,0.15)">
+              <img src="/mansalay-logo.png" alt="Seal" class="w-full h-full object-cover"/>
+            </div>
+            <div>
+              <h1 class="text-xl font-black tracking-tight" style="color:#f1f5f9">Welcome back</h1>
+              <p class="text-xs mt-0.5" style="color:#475569">Sign in to your ScoreSync account.</p>
             </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
-            <div class="relative">
-              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              </span>
-              <input type="password" name="password" id="passwordInput" placeholder="••••••••" required autocomplete="current-password"
-                style="width:100%;padding:11px 42px 11px 40px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.875rem;color:#0f172a;outline:none;background:#fff;"
-                onfocus="this.style.borderColor='#3b82f6';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.12)'"
-                onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'"/>
-              <button type="button" id="eyeBtn" onclick="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition">
-                <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
+
+          {{#if error_msg}}
+          <div class="alert-error mb-5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{error_msg}}</span>
+          </div>
+          {{/if}}
+          {{#if success_msg}}
+          <div class="alert-success mb-5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>{{success_msg}}</span>
+          </div>
+          {{/if}}
+
+          <form method="POST" action="/login" class="space-y-5">
+
+            <!-- Email -->
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-2" style="color:#4b5563">Email Address</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#374151">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </span>
+                <input type="email" name="email" placeholder="you@example.com" required autocomplete="email"
+                  class="w-full"
+                  style="padding:11px 14px 11px 40px;border:1.5px solid rgba(255,255,255,0.10);border-radius:10px;font-size:0.875rem;color:#e2e8f0;outline:none;background:#1e293b;"
+                  onfocus="this.style.borderColor='#3b82f6';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.20)'"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.10)';this.style.boxShadow='none'"/>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 text-slate-500 text-sm cursor-pointer select-none">
-              <input type="checkbox" class="w-4 h-4 rounded accent-blue-600"> Remember me
-            </label>
-            <a href="/forgot-password" class="text-blue-600 hover:underline text-xs font-semibold">Forgot password?</a>
-          </div>
-          <button type="submit" class="btn-primary w-full py-3 text-sm justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Sign In
-          </button>
-        </form>
+
+            <!-- Password -->
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase tracking-widest mb-2" style="color:#4b5563">Password</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#374151">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" name="password" id="passwordInput" placeholder="••••••••" required autocomplete="current-password"
+                  class="w-full"
+                  style="padding:11px 42px 11px 40px;border:1.5px solid rgba(255,255,255,0.10);border-radius:10px;font-size:0.875rem;color:#e2e8f0;outline:none;background:#1e293b;"
+                  onfocus="this.style.borderColor='#3b82f6';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.20)'"
+                  onblur="this.style.borderColor='rgba(255,255,255,0.10)';this.style.boxShadow='none'"/>
+                <button type="button" id="eyeBtn" onclick="togglePassword()"
+                  class="absolute right-3.5 top-1/2 -translate-y-1/2 transition" style="color:#374151">
+                  <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Remember + Forgot -->
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-sm cursor-pointer select-none" style="color:#64748b">
+                <input type="checkbox" class="w-4 h-4 rounded" style="accent-color:#3b82f6"> Remember me
+              </label>
+              <a href="/forgot-password" class="text-xs font-semibold hover:underline" style="color:#60a5fa">Forgot password?</a>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition hover:opacity-90 active:scale-95"
+              style="background:linear-gradient(135deg,#1d4ed8,#4f46e5);box-shadow:0 4px 14px rgba(37,99,235,0.4)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Sign In
+            </button>
+
+          </form>
+        </div>
       </div>
-      <p class="text-center text-sm text-slate-500 mt-5">Don't have an account? <a href="/register" class="text-blue-600 font-bold hover:underline">Register here</a></p>
+
+      <p class="text-center text-sm mt-5" style="color:#374151">
+        Don't have an account?
+        <a href="/register" class="font-bold hover:underline ml-1" style="color:#60a5fa">Register here</a>
+      </p>
     </div>
   </div>
+
 <script>
 const eyeOpen='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 const eyeClose='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-function togglePassword(){const i=document.getElementById('passwordInput'),b=document.getElementById('eyeBtn');if(i.type==='password'){i.type='text';b.innerHTML=eyeClose;}else{i.type='password';b.innerHTML=eyeOpen;}}
+function togglePassword(){
+  const i=document.getElementById('passwordInput'),b=document.getElementById('eyeBtn');
+  if(i.type==='password'){i.type='text';b.innerHTML=eyeClose;}
+  else{i.type='password';b.innerHTML=eyeOpen;}
+}
 </script>
 </body>
 </html>
