@@ -12,15 +12,17 @@ export const dashboardPage = async (req, res) => {
     const recentEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     // Count totals for admin
-    let totalEvents = 0, totalUsers = 0, pendingCount = 0;
+    let totalEvents = 0, totalUsers = 0, pendingCount = 0, ongoingCount = 0;
     let pendingUsers = [];
 
     if (role === "admin") {
-      const [evSnap, uSnap] = await Promise.all([
+      const [evSnap, uSnap, ongoingSnap] = await Promise.all([
         getDocs(collection(db, "events")),
         getDocs(collection(db, "users")),
+        getDocs(query(collection(db, "events"), where("status", "==", "ongoing"))),
       ]);
       totalEvents = evSnap.size;
+      ongoingCount = ongoingSnap.size;
 
       const allUsers = uSnap.docs.map(d => {
         const data = d.data();
@@ -52,6 +54,7 @@ export const dashboardPage = async (req, res) => {
       recentEvents,
       totalEvents,
       totalUsers,
+      ongoingCount,
       pendingUsers,
       pendingCount,
     };
