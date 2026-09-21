@@ -181,6 +181,12 @@
         Don't have an account?
         <a href="/register" class="font-bold hover:underline ml-1" style="color:#60a5fa">Register here</a>
       </p>
+      <p class="text-center mt-3">
+        <a href="/" class="inline-flex items-center gap-1.5 text-xs font-semibold hover:underline" style="color:#374151">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to Home
+        </a>
+      </p>
     </div>
   </div>
 
