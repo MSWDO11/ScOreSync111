@@ -51,6 +51,7 @@ export const dashboardPage = async (req, res) => {
       isAdmin:     role === "admin",
       isJudge:     role === "judge",
       isEncoder:   role === "encoder",
+      isOrganizer: role === "organizer",
       recentEvents,
       totalEvents,
       totalUsers,
@@ -59,8 +60,9 @@ export const dashboardPage = async (req, res) => {
       pendingCount,
     };
 
-    if (role === "admin")   return res.render("dashboard/admin",   viewData);
-    if (role === "judge")   return res.render("dashboard/judge",   viewData);
+    if (role === "admin")     return res.render("dashboard/admin",     viewData);
+    if (role === "judge")     return res.render("dashboard/judge",     viewData);
+    if (role === "organizer") return res.render("dashboard/organizer", viewData);
     return res.render("dashboard/encoder", viewData);
 
   } catch (err) {
@@ -74,9 +76,11 @@ export const dashboardPage = async (req, res) => {
       isAdmin:     role === "admin",
       isJudge:     role === "judge",
       isEncoder:   role === "encoder",
+      isOrganizer: role === "organizer",
       recentEvents: [],
       totalEvents: 0,
       totalUsers: 0,
+      ongoingCount: 0,
     });
   }
 };
