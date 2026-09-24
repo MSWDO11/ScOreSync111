@@ -166,7 +166,7 @@
         </div>
 
         <!-- QR Code Preview Card -->
-        <div class="card-flat">
+        <div class="card-flat hidden" id="event-qr-card">
           <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
             <div class="w-8 h-8 grad-purple rounded-lg flex items-center justify-center shadow-sm">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="16" y="16" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/></svg>
@@ -302,6 +302,12 @@ function handleEventType(sel) {
   const paymentCard = document.getElementById('payment-qr-card');
   if (paymentCard) {
     paymentCard.classList.toggle('hidden', !PAYMENT_TYPES.includes(type));
+  }
+
+  // Event QR placeholder — also only show for payment types
+  const eventQrCard = document.getElementById('event-qr-card');
+  if (eventQrCard) {
+    eventQrCard.classList.toggle('hidden', !PAYMENT_TYPES.includes(type));
   }
 }
 
