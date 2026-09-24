@@ -53,41 +53,41 @@ router.post( "/users/:id/approve",    requireAuth, requireRole("admin"), approve
 router.post( "/users/:id/reject",     requireAuth, requireRole("admin"), rejectUser);
 router.post( "/users/:id/delete",     requireAuth, requireRole("admin"), deleteUser);
 
-// ─── Events (admin only for mutations, all auth for reads) ────────────────────
+// ─── Events (admin + organizer for mutations, all auth for reads) ─────────────
 import {
   listEvents, createEventPage, storeEvent,
   showEvent, editEventPage, updateEvent, deleteEvent, updateEventStatus,
 } from "../controllers/eventController.js";
 
-router.get( "/events",                requireAuth,                 listEvents);
-router.get( "/events/create",         requireAuth, requireRole("admin"),       createEventPage);
-router.post("/events",                requireAuth, requireRole("admin"),       storeEvent);
-router.get( "/events/:id",            requireAuth,                 showEvent);
-router.get( "/events/:id/edit",       requireAuth, requireRole("admin"),       editEventPage);
-router.post("/events/:id/update",     requireAuth, requireRole("admin"),       updateEvent);
-router.post("/events/:id/status",     requireAuth, requireRole("admin"),       updateEventStatus);
-router.post("/events/:id/delete",     requireAuth, requireRole("admin"),       deleteEvent);
+router.get( "/events",                requireAuth,                                      listEvents);
+router.get( "/events/create",         requireAuth, requireRole("admin","organizer"),     createEventPage);
+router.post("/events",                requireAuth, requireRole("admin","organizer"),     storeEvent);
+router.get( "/events/:id",            requireAuth,                                      showEvent);
+router.get( "/events/:id/edit",       requireAuth, requireRole("admin","organizer"),     editEventPage);
+router.post("/events/:id/update",     requireAuth, requireRole("admin","organizer"),     updateEvent);
+router.post("/events/:id/status",     requireAuth, requireRole("admin","organizer"),     updateEventStatus);
+router.post("/events/:id/delete",     requireAuth, requireRole("admin"),                 deleteEvent);
 
-// ─── Contestants (admin & encoder can mutate) ─────────────────────────────────
+// ─── Contestants (admin, organizer & encoder can mutate) ──────────────────────
 import {
   addContestantPage, storeContestant,
   editContestantPage, updateContestant, deleteContestant,
 } from "../controllers/contestantController.js";
 
-router.get( "/events/:eventId/contestants/add",              requireAuth, requireRole("admin","encoder"), addContestantPage);
-router.post("/events/:eventId/contestants",                  requireAuth, requireRole("admin","encoder"), storeContestant);
-router.get( "/events/:eventId/contestants/:id/edit",         requireAuth, requireRole("admin","encoder"), editContestantPage);
-router.post("/events/:eventId/contestants/:id/update",       requireAuth, requireRole("admin","encoder"), updateContestant);
-router.post("/events/:eventId/contestants/:id/delete",       requireAuth, requireRole("admin"),           deleteContestant);
+router.get( "/events/:eventId/contestants/add",              requireAuth, requireRole("admin","organizer","encoder"), addContestantPage);
+router.post("/events/:eventId/contestants",                  requireAuth, requireRole("admin","organizer","encoder"), storeContestant);
+router.get( "/events/:eventId/contestants/:id/edit",         requireAuth, requireRole("admin","organizer","encoder"), editContestantPage);
+router.post("/events/:eventId/contestants/:id/update",       requireAuth, requireRole("admin","organizer","encoder"), updateContestant);
+router.post("/events/:eventId/contestants/:id/delete",       requireAuth, requireRole("admin","organizer"),           deleteContestant);
 
-// ─── Criteria (admin only) ────────────────────────────────────────────────────
+// ─── Criteria (admin & organizer) ────────────────────────────────────────────
 import {
   addCriteriaPage, storeCriteria, deleteCriteria,
 } from "../controllers/criteriaController.js";
 
-router.get( "/events/:eventId/criteria",          requireAuth, requireRole("admin"),       addCriteriaPage);
-router.post("/events/:eventId/criteria",          requireAuth, requireRole("admin"),       storeCriteria);
-router.post("/events/:eventId/criteria/:id/delete", requireAuth, requireRole("admin"),     deleteCriteria);
+router.get( "/events/:eventId/criteria",            requireAuth, requireRole("admin","organizer"), addCriteriaPage);
+router.post("/events/:eventId/criteria",            requireAuth, requireRole("admin","organizer"), storeCriteria);
+router.post("/events/:eventId/criteria/:id/delete", requireAuth, requireRole("admin","organizer"), deleteCriteria);
 
 // ─── Scoring (judges can enter scores; all auth can view results) ─────────────
 import {
@@ -108,22 +108,22 @@ router.get( "/analytics/export",              requireAuth, requireRole("admin"),
 router.post("/analytics/run",                 requireAuth, requireRole("admin"), runAIAnalytics);
 router.post("/analytics/flags/:flagId/status",requireAuth, requireRole("admin"), updateFlagStatus);
 
-// ─── Inventory (admin only for mutations, all auth for reads) ──────────────────
+// ─── Inventory (admin & organizer) ────────────────────────────────────────────
 import {
   listInventory, storeInventoryItem, updateInventoryItem, deleteInventoryItem, exportInventoryCSV,
 } from "../controllers/inventoryController.js";
 
-router.get( "/inventory",              requireAuth, requireRole("admin"),           listInventory);
-router.get( "/inventory/export",       requireAuth, requireRole("admin"),           exportInventoryCSV);
-router.post("/inventory",              requireAuth, requireRole("admin"),           storeInventoryItem);
-router.post("/inventory/:id/update",   requireAuth, requireRole("admin"),           updateInventoryItem);
-router.post("/inventory/:id/delete",   requireAuth, requireRole("admin"),           deleteInventoryItem);
+router.get( "/inventory",              requireAuth, requireRole("admin","organizer"), listInventory);
+router.get( "/inventory/export",       requireAuth, requireRole("admin","organizer"), exportInventoryCSV);
+router.post("/inventory",              requireAuth, requireRole("admin","organizer"), storeInventoryItem);
+router.post("/inventory/:id/update",   requireAuth, requireRole("admin","organizer"), updateInventoryItem);
+router.post("/inventory/:id/delete",   requireAuth, requireRole("admin","organizer"), deleteInventoryItem);
 
-// ─── Event Finance (admin only) ───────────────────────────────────────────────
+// ─── Event Finance (admin & organizer) ────────────────────────────────────────
 import { storeFinanceEntry, deleteFinanceEntry } from "../controllers/financeController.js";
 
-router.post("/events/:eventId/finance",              requireAuth, requireRole("admin"), storeFinanceEntry);
-router.post("/events/:eventId/finance/:entryId/delete", requireAuth, requireRole("admin"), deleteFinanceEntry);
+router.post("/events/:eventId/finance",                 requireAuth, requireRole("admin","organizer"), storeFinanceEntry);
+router.post("/events/:eventId/finance/:entryId/delete", requireAuth, requireRole("admin","organizer"), deleteFinanceEntry);
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
 import { settingsPage, updateSettings, suggestFeature } from "../controllers/settingsController.js";

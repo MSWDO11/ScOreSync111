@@ -1,12 +1,12 @@
 {{> head }}
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col" style="background:#0a0f1e">
 {{> navbar }}
 <div class="flex flex-1 overflow-hidden">
 {{> sidebar }}
 <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
 
   <!-- ── Sticky Top Bar ── -->
-  <div class="sticky top-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-white/95 border-b border-slate-100 shadow-sm no-print" style="backdrop-filter:blur(12px)">
+  <div class="sticky top-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 no-print" style="background:rgba(10,15,30,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.07);box-shadow:0 4px 24px rgba(0,0,0,0.4)">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">

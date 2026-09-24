@@ -1,5 +1,5 @@
 {{> head }}
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col" style="background:#0a0f1e">
 {{> navbar }}
 <div class="flex flex-1 overflow-hidden">
 {{> sidebar }}
@@ -32,7 +32,7 @@
       </div>
     </div>
     <!-- Action toolbar -->
-    <div class="px-6 py-3 bg-white border-t border-slate-100 flex flex-wrap items-center gap-2">
+    <div class="px-6 py-3 flex flex-wrap items-center gap-2" style="border-top:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)">
       {{#if isAdmin}}
       {{#if (eq event.status 'upcoming')}}
       <form method="POST" action="/events/{{event.id}}/status" class="inline">

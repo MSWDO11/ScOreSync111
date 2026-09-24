@@ -65,6 +65,7 @@ export const scoringPage = async (req, res) => {
       isAdmin:     req.session.userRole === "admin",
       isJudge:     req.session.userRole === "judge",
       isEncoder:   req.session.userRole === "encoder",
+      isOrganizer: req.session.userRole === "organizer",
     });
   } catch (err) {
     console.error(err);

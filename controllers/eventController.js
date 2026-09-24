@@ -22,6 +22,7 @@ export const listEvents = async (req, res) => {
       isAdmin:     req.session.userRole === "admin",
       isJudge:     req.session.userRole === "judge",
       isEncoder:   req.session.userRole === "encoder",
+      isOrganizer: req.session.userRole === "organizer",
     });
   } catch (err) {
     console.error(err);
@@ -37,7 +38,8 @@ export const createEventPage = (req, res) => {
     userName:    req.session.userName,
     userRole:    req.session.userRole,
     userInitial: (req.session.userName || "U")[0].toUpperCase(),
-    isAdmin:     true,
+    isAdmin:     req.session.userRole === "admin",
+    isOrganizer: req.session.userRole === "organizer",
   });
 };
 
@@ -118,6 +120,7 @@ export const showEvent = async (req, res) => {
       isAdmin:     req.session.userRole === "admin",
       isJudge:     req.session.userRole === "judge",
       isEncoder:   req.session.userRole === "encoder",
+      isOrganizer: req.session.userRole === "organizer",
     });
   } catch (err) {
     console.error(err);
@@ -138,7 +141,8 @@ export const editEventPage = async (req, res) => {
       userName:    req.session.userName,
       userRole:    req.session.userRole,
       userInitial: (req.session.userName || "U")[0].toUpperCase(),
-      isAdmin:     true,
+      isAdmin:     req.session.userRole === "admin",
+      isOrganizer: req.session.userRole === "organizer",
     });
   } catch (err) {
     req.flash("error_msg", "Could not load event.");
