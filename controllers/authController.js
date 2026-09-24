@@ -151,7 +151,7 @@ export const loginUser = async (req, res) => {
 
 export const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
-  const allowedRoles = ["judge", "encoder"];   // admin only via /setup
+  const allowedRoles = ["judge", "encoder", "organizer"];   // admin only via /setup
 
   if (!allowedRoles.includes(role)) {
     req.flash("error_msg", "Invalid role selected.");
