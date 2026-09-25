@@ -338,7 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (typeSel) handleEventType(typeSel);
 });
-</script>
+
+function handleEditQRUpload(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 2 * 1024 * 1024) { alert('Image too large. Max 2MB.'); input.value=''; return; }
