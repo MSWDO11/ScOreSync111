@@ -109,7 +109,7 @@
       <p class="text-xl font-black leading-none tracking-tight relative z-10 mt-1">Income &amp; Expenses</p>
       <p class="text-xs mt-1 relative z-10" style="color:rgba(196,181,253,0.7)">Track event finances</p>
       <a href="/events" class="inline-flex items-center gap-1.5 text-xs font-bold relative z-10 mt-3" style="color:rgba(196,181,253,0.9)">
-        View events
+        View events with Finance tab
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>

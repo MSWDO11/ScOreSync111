@@ -361,11 +361,20 @@
           Add Entry
         </button>
         {{/if}}
+        {{#if isOrganizer}}
+        <button onclick="toggleFinanceForm()" class="btn-sm btn-sm-green text-xs">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Entry
+        </button>
+        {{/if}}
       </div>
 
-      <!-- Add Entry Form (admin, collapsible) -->
+      <!-- Add Entry Form (admin + organizer, collapsible) -->
       {{#if isAdmin}}
       <div id="finance-form-wrap" class="hidden" style="border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(99,102,241,0.04)">
+      {{else}}{{#if isOrganizer}}
+      <div id="finance-form-wrap" class="hidden" style="border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(99,102,241,0.04)">
+      {{/if}}{{/if}}
         <form method="POST" action="/events/{{event.id}}/finance" class="px-6 py-5">
           <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -435,7 +444,7 @@
           </div>
         </form>
       </div>
-      {{/if}}
+      {{#if isAdmin}}{{/if}}{{#if isOrganizer}}{{/if}}
 
       <!-- Entries table -->
       {{#if finance.entries.length}}
