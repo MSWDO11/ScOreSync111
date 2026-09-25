@@ -101,9 +101,6 @@ export const showEvent = async (req, res) => {
     event.isPrizeType = PRIZE_TYPES.includes(event.type);
     // Flag for finance management (admin + organizer)
     event.canManageFinance = ['admin','organizer'].includes(req.session.userRole);
-    // Flag whether this event type uses prizes/rules
-    const PRIZE_TYPES = ['pageant','talent','choral','dance','culinary','academic','other'];
-    event.isPrizeType = PRIZE_TYPES.includes(event.type);
 
     const [cSnap, crSnap, finance] = await Promise.all([
       getDocs(collection(db, EVENTS, req.params.id, "contestants")),
