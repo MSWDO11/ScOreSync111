@@ -25,7 +25,7 @@
         </div>
         <div class="px-5 py-5 space-y-4">
           <div class="relative mx-auto" style="width:200px">
-            <div id="photo-frame" class="relative rounded-2xl overflow-hidden border-4 border-white shadow-xl" style="width:200px;height:260px;background:linear-gradient(160deg,#e0e7ff,#ede9fe)">
+            <div id="photo-frame" class="relative rounded-2xl overflow-hidden border-4 shadow-xl" style="width:200px;height:260px;background:linear-gradient(160deg,#0f1e3d,#1a2f5a);border-color:rgba(255,255,255,0.12)">
               {{#if contestant.photo}}
               <img id="photo-preview" src="{{contestant.photo}}" alt="{{contestant.name}}" class="w-full h-full object-cover" style="object-position:center top"/>
               <div id="photo-placeholder" class="absolute inset-0 flex flex-col items-center justify-center gap-2" style="display:none">

@@ -97,15 +97,15 @@
       {{#if contestants.length}}
       <div class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {{#each contestants}}
-        <div class="group relative rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-white hover:-translate-y-1"
-          style="aspect-ratio:3/4">
+        <div class="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+          style="aspect-ratio:3/4;border:1px solid rgba(255,255,255,0.08);background:#111827">
           <!-- Photo or gradient fallback -->
           {{#if photo}}
           <img src="{{photo}}" alt="{{name}}"
             class="absolute inset-0 w-full h-full object-cover"
             style="object-position:center top"/>
           {{else}}
-          <div class="absolute inset-0 flex items-center justify-center" style="background:linear-gradient(160deg,#e0e7ff,#ede9fe)">
+          <div class="absolute inset-0 flex items-center justify-center" style="background:linear-gradient(160deg,#0f1e3d,#1a2f5a)">
             <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-black shadow-lg" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">{{number}}</div>
           </div>
           {{/if}}

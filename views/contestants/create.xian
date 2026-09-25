@@ -28,7 +28,7 @@
           <!-- Photo Preview -->
           <div class="relative mx-auto" style="width:200px">
             <!-- Portrait frame like a pageant photo -->
-            <div id="photo-frame" class="relative rounded-2xl overflow-hidden border-4 border-white shadow-xl" style="width:200px;height:260px;background:linear-gradient(160deg,#e0e7ff,#ede9fe)">
+            <div id="photo-frame" class="relative rounded-2xl overflow-hidden border-4 shadow-xl" style="width:200px;height:260px;background:linear-gradient(160deg,#0f1e3d,#1a2f5a);border-color:rgba(255,255,255,0.12)">
               <img id="photo-preview" src="" alt="Contestant photo"
                 class="w-full h-full object-cover hidden"
                 style="object-position:center top"/>
