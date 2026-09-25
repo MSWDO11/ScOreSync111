@@ -254,8 +254,6 @@
   </form>
 </main>
 </div>
-{{> footer }}
-</body>
 <script>
 /* ── Auto-set status from date ── */
 function autoSetStatus(dateInput) {
@@ -374,4 +372,5 @@ function removeEditQR() {
   document.getElementById('edit-qr-new-preview').classList.add('hidden');
 }
 </script>
+{{> footer }}
 </html>
