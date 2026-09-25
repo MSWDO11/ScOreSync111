@@ -159,10 +159,12 @@ export const updateEvent = async (req, res) => {
     name, description, date, time, venue, type, status,
     organizer, maxContestants, prizes, rules, theme, notes,
     paymentMethod, paymentAccountName, paymentAccountNumber, paymentQR,
+    otherType,
   } = req.body;
   try {
     await updateDoc(doc(db, EVENTS, req.params.id), {
       name, description, date, time, venue, type, status,
+      otherType:            otherType            || "",
       organizer:            organizer            || "",
       maxContestants:       maxContestants       || "",
       prizes:               prizes               || "",

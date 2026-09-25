@@ -78,6 +78,31 @@
       <a href="/events/{{event.id}}/results" class="btn-sm btn-sm-green"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Results</a>
       {{/if}}
       {{#if isOrganizer}}
+      {{#if (eq event.status 'upcoming')}}
+      <form method="POST" action="/events/{{event.id}}/status" class="inline">
+        <input type="hidden" name="status" value="ongoing">
+        <button type="submit" class="btn-sm bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Event
+        </button>
+      </form>
+      {{/if}}
+      {{#if (eq event.status 'ongoing')}}
+      <form method="POST" action="/events/{{event.id}}/status" class="inline" onsubmit="return confirm('Are you sure you want to manually end this event?')">
+        <input type="hidden" name="status" value="completed">
+        <button type="submit" class="btn-sm bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Manual End Event
+        </button>
+      </form>
+      {{/if}}
+      {{#if (eq event.status 'completed')}}
+      <form method="POST" action="/events/{{event.id}}/status" class="inline">
+        <input type="hidden" name="status" value="ongoing">
+        <button type="submit" class="btn-sm btn-sm-gray flex items-center gap-1.5">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Re-open Event
+        </button>
+      </form>
+      {{/if}}
+      <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
       <a href="/events/{{event.id}}/edit" class="btn-sm btn-sm-gray"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</a>
       <a href="/events/{{event.id}}/contestants/add" class="btn-sm btn-sm-blue"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Add Contestant</a>
       <a href="/events/{{event.id}}/criteria" class="btn-sm btn-sm-purple"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Criteria</a>
@@ -93,6 +118,7 @@
       <div class="section-header">
         <h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contestants <span class="ml-1.5 bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">{{contestants.length}}</span></h2>
         {{#if isAdmin}}<a href="/events/{{event.id}}/contestants/add" class="btn-primary btn-sm text-xs px-3 py-1.5"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add</a>{{/if}}
+        {{#if isOrganizer}}<a href="/events/{{event.id}}/contestants/add" class="btn-primary btn-sm text-xs px-3 py-1.5"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add</a>{{/if}}
       </div>
       {{#if contestants.length}}
       <div class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
